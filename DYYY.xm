@@ -1014,31 +1014,7 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 
 %end
 
-%hook UIViewController
-- (void)viewWillAppear:(BOOL)animated {
-    %orig(animated);
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
-}
 
-- (void)viewDidAppear:(BOOL)animated {
-    %orig(animated);
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
-}
-
-- (void)viewDidLayoutSubviews {
-    %orig;
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
-}
-
-- (void)viewWillLayoutSubviews {
-    %orig;
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
-}
-%end
 
 %hook AWEBaseListViewController
 - (void)viewDidLayoutSubviews {
@@ -6885,17 +6861,35 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
     if (hideButton && hideButton.isElementsHidden) {
         [hideButton hideUIElements];
     }
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-      isAppInTransition = NO;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{    isAppInTransition = NO;
     });
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    %orig;
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     %orig;
     isAppInTransition = YES;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-      isAppInTransition = NO;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{    isAppInTransition = NO;
     });
+}
+
+- (void)viewDidLayoutSubviews {
+    %orig;
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
+}
+
+- (void)viewWillLayoutSubviews {
+    %orig;
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
 }
 %end
 
