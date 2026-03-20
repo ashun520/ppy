@@ -5611,11 +5611,13 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
         [self calculateTabBarHeight];
     }
 
-    if ([self applyTabBarHeight])
-        return;
+    BOOL appliedHeight = [self applyTabBarHeight];
     
     // 应用全局文字颜色和渐变色文字效果
     applyGlobalTextColorToView(self);
+    
+    if (appliedHeight)
+        return;
 
     BOOL hideShop = DYYYGetBool(@"DYYYHideShopButton");
     BOOL hideMsg = DYYYGetBool(@"DYYYHideMessageButton");
@@ -6122,6 +6124,9 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
 
 - (void)viewDidLayoutSubviews {
     %orig;
+
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
 
     if (!DYYYGetBool(@"DYYYEnableCommentBlur"))
         return;
