@@ -623,6 +623,21 @@ typedef NS_ENUM(NSInteger, DYYYSettingItemType) { DYYYSettingItemTypeSwitch, DYY
     cell.textLabel.text = item.title;
     cell.textLabel.textColor = [UIColor whiteColor];
     cell.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
+    
+    // 为特定设置项添加图标
+    if ([item.key isEqualToString:@"DYYYGlobalTextColor"]) {
+        UIImageView *iconView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+        iconView.image = [UIImage systemImageNamed:@"textformat"];
+        iconView.tintColor = [UIColor whiteColor];
+        cell.imageView.image = iconView.image;
+    } else if ([item.key isEqualToString:@"DYYYEnableGradientText"]) {
+        UIImageView *iconView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+        iconView.image = [UIImage systemImageNamed:@"gradient"];
+        iconView.tintColor = [UIColor whiteColor];
+        cell.imageView.image = iconView.image;
+    } else {
+        cell.imageView.image = nil;
+    }
 
     cell.backgroundView = nil;
 

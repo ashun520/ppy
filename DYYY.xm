@@ -3042,6 +3042,25 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 }
 %end
 
+// 为聊天消息添加颜色渲染
+%hook AWEIMReusableCommonCell
+
+- (void)layoutSubviews {
+    %orig;
+    
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
+}
+
+- (void)setCurrentContext:(id)currentContext {
+    %orig(currentContext);
+    
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
+}
+
+%end
+
 // 隐藏合集和声明
 %hook AWEAntiAddictedNoticeBarView
 - (void)layoutSubviews {
@@ -6125,6 +6144,28 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
     
     // 应用全局文字颜色和渐变色文字效果
     applyGlobalTextColorToView(self.view);
+}
+
+- (void)viewDidLayoutSubviews {
+    %orig;
+
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
+
+    if (!DYYYGetBool(@"DYYYEnableCommentBlur"))
+        return;
+
+    Class containerViewClass = NSClassFromString(@"AWECommentInputViewSwiftImpl.CommentInputContainerView");
+    NSArray<UIView *> *containerViews = [DYYYUtils findAllSubviewsOfClass:containerViewClass inContainer:self.view];
+    for (UIView *containerView in containerViews) {
+        for (UIView *subview in containerView.subviews) {
+            if ([subview isKindOfClass:[UITextView class]]) {
+                [DYYYUtils applyColorSettingsToTextView:(UITextView *)subview colorHexString:[[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"]];
+            } else if ([subview isKindOfClass:[UITextField class]]) {
+                [DYYYUtils applyColorSettingsToTextField:(UITextField *)subview colorHexString:[[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"]];
+            }
+        }
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
