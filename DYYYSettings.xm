@@ -255,36 +255,6 @@ void showDYYYSettingsVC(UIViewController *rootVC, BOOL hasAgreed) {
     mainSection.type = 0;
     NSMutableArray<AWESettingItemModel *> *mainItems = [NSMutableArray array];
 
-    // 添加全局文字颜色选项到主菜单
-    AWESettingItemModel *globalTextColorItem = [[%c(AWESettingItemModel) alloc] init];
-    globalTextColorItem.identifier = @"DYYYGlobalTextColorSettings";
-    globalTextColorItem.title = @"全局文字颜色";
-    globalTextColorItem.subTitle = @"自定义全局文字颜色和渐变效果";
-    globalTextColorItem.type = 0;
-    globalTextColorItem.svgIconImageName = @"ic_font_outlined_20";
-    globalTextColorItem.cellType = 26;
-    globalTextColorItem.colorStyle = 0;
-    globalTextColorItem.isEnable = YES;
-    globalTextColorItem.cellTappedBlock = ^{
-      // 直接打开颜色选择器
-      DYYYColorPickerViewController *colorPicker = [[DYYYColorPickerViewController alloc] init];
-      colorPicker.isDarkMode = YES;
-      
-      colorPicker.colorSelectedHandler = ^(NSString *colorScheme) {
-        [[NSUserDefaults standardUserDefaults] setObject:colorScheme forKey:@"DYYYGlobalTextColor"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"DYYYGlobalTextColorDidChangeNotification" object:nil userInfo:@{@"colorScheme": colorScheme}];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-          UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"设置成功" message:@"颜色已应用，部分文字可能需要重新加载" preferredStyle:UIAlertControllerStyleAlert];
-          [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
-          [settingsVC presentViewController:alert animated:YES completion:nil];
-        });
-      };
-      
-      [settingsVC.navigationController pushViewController:colorPicker animated:YES];
-    };
-    [mainItems addObject:globalTextColorItem];
-
     // 创建基本设置分类项
     AWESettingItemModel *basicSettingItem = [[%c(AWESettingItemModel) alloc] init];
     basicSettingItem.identifier = @"DYYYBasicSettings";

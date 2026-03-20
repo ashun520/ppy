@@ -83,6 +83,38 @@ static void updateGlobalTextColorCache() {
 }
 @end
 
+// UITextField Category 用于全局文字颜色
+@interface UITextField (DYYYGlobalTextColor)
+- (void)dyyy_applyGlobalTextColor;
+@end
+
+@implementation UITextField (DYYYGlobalTextColor)
+- (void)dyyy_applyGlobalTextColor {
+    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+        return;
+    }
+    
+    // 使用 DYYYUtils 的方法应用颜色方案
+    [DYYYUtils applyColorSettingsToTextField:self colorHexString:gCurrentGlobalTextColorScheme];
+}
+@end
+
+// UITextView Category 用于全局文字颜色
+@interface UITextView (DYYYGlobalTextColor)
+- (void)dyyy_applyGlobalTextColor;
+@end
+
+@implementation UITextView (DYYYGlobalTextColor)
+- (void)dyyy_applyGlobalTextColor {
+    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+        return;
+    }
+    
+    // 使用 DYYYUtils 的方法应用颜色方案
+    [DYYYUtils applyColorSettingsToTextView:self colorHexString:gCurrentGlobalTextColorScheme];
+}
+@end
+
 static NSDictionary<NSString *, NSString *> *DYYYTopTabTitleMapping(void) {
     static NSString *cachedRawValue = nil;
     static NSDictionary<NSString *, NSString *> *cachedMapping = nil;
@@ -2133,6 +2165,27 @@ static BOOL isGestureActive = NO;
     %orig(text);
     
     // 应用全局文字颜色
+    [self dyyy_applyGlobalTextColor];
+}
+
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    %orig(attributedText);
+    
+    // 应用全局文字颜色到 attributedText
+    [self dyyy_applyGlobalTextColor];
+}
+
+- (void)layoutSubviews {
+    %orig;
+    
+    // 确保布局后颜色仍然生效
+    [self dyyy_applyGlobalTextColor];
+}
+
+- (void)awakeFromNib {
+    %orig;
+    
+    // 加载时应用颜色
     [self dyyy_applyGlobalTextColor];
 }
 
@@ -5284,6 +5337,20 @@ static NSHashTable *processedParentViews = nil;
 
 %hook UITextField
 
+- (void)setText:(NSString *)text {
+    %orig(text);
+    
+    // 应用全局文字颜色
+    [self dyyy_applyGlobalTextColor];
+}
+
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    %orig(attributedText);
+    
+    // 应用全局文字颜色到 attributedText
+    [self dyyy_applyGlobalTextColor];
+}
+
 - (void)willMoveToWindow:(UIWindow *)newWindow {
     %orig;
 
@@ -5302,6 +5369,20 @@ static NSHashTable *processedParentViews = nil;
 %end
 
 %hook UITextView
+
+- (void)setText:(NSString *)text {
+    %orig(text);
+    
+    // 应用全局文字颜色
+    [self dyyy_applyGlobalTextColor];
+}
+
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    %orig(attributedText);
+    
+    // 应用全局文字颜色到 attributedText
+    [self dyyy_applyGlobalTextColor];
+}
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
     %orig;
