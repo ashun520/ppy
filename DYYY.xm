@@ -53,47 +53,18 @@ static void updateGlobalTransparencyCache() {
     gGlobalTransparency = kInvalidAlpha;
 }
 
-// 全局文字颜色相关变量（已禁用，导致闪退）
-// static NSString *const kDYYYGlobalTextColorKey = @"DYYYGlobalTextColor";
-// static NSString *const kDYYYGlobalTextColorDidChangeNotification = @"DYYYGlobalTextColorDidChangeNotification";
-// static NSString *gCurrentGlobalTextColorScheme = nil;
-// static id dyyyGlobalTextColorObserver = nil;
+// 全局文字颜色相关变量
+static NSString *const kDYYYGlobalTextColorKey = @"DYYYGlobalTextColor";
+static NSString *gCurrentGlobalTextColorScheme = nil;
 
-// static void updateGlobalTextColorCache() {
-//     NSString *colorScheme = DYYYGetString(kDYYYGlobalTextColorKey);
-//     if (colorScheme.length > 0) {
-//         gCurrentGlobalTextColorScheme = [colorScheme copy];
-//     } else {
-//         gCurrentGlobalTextColorScheme = nil;
-//     }
-// }
-
-// 辅助函数：应用全局文字颜色到 UILabel（已禁用）
-// static void DYYYApplyGlobalTextColorToLabel(UILabel *label) {
-//     if (!label || !gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
-//         return;
-//     }
-//     
-//     [DYYYUtils applyColorSettingsToLabel:label colorHexString:gCurrentGlobalTextColorScheme];
-// }
-
-// 辅助函数：应用全局文字颜色到 UITextField（已禁用）
-// static void DYYYApplyGlobalTextColorToTextField(UITextField *textField) {
-//     if (!textField || !gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
-//         return;
-//     }
-//     
-//     [DYYYUtils applyColorSettingsToTextField:textField colorHexString:gCurrentGlobalTextColorScheme];
-// }
-
-// 辅助函数：应用全局文字颜色到 UITextView（已禁用）
-// static void DYYYApplyGlobalTextColorToTextView(UITextView *textView) {
-//     if (!textView || !gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
-//         return;
-//     }
-//     
-//     [DYYYUtils applyColorSettingsToTextView:textView colorHexString:gCurrentGlobalTextColorScheme];
-// }
+static void updateGlobalTextColorCache() {
+    NSString *colorScheme = DYYYGetString(kDYYYGlobalTextColorKey);
+    if (colorScheme.length > 0) {
+        gCurrentGlobalTextColorScheme = [colorScheme copy];
+    } else {
+        gCurrentGlobalTextColorScheme = nil;
+    }
+}
 
 // UILabel Category 用于全局文字颜色（已移除，使用辅助函数代替）
 
@@ -2150,22 +2121,19 @@ static BOOL isGestureActive = NO;
 
     %orig(text);
     
-    // 应用全局文字颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToLabel(self);
+    // 应用全局文字颜色（简化版）
+    if (gCurrentGlobalTextColorScheme && gCurrentGlobalTextColorScheme.length > 0) {
+        [DYYYUtils applyColorSettingsToLabel:self colorHexString:gCurrentGlobalTextColorScheme];
+    }
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
-    // 应用全局文字颜色到 attributedText（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToLabel(self);
-}
-
-- (void)awakeFromNib {
-    %orig;
-    
-    // 加载时应用颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToLabel(self);
+    // 应用全局文字颜色到 attributedText（简化版）
+    if (gCurrentGlobalTextColorScheme && gCurrentGlobalTextColorScheme.length > 0) {
+        [DYYYUtils applyColorSettingsToLabel:self colorHexString:gCurrentGlobalTextColorScheme];
+    }
 }
 
 %end
@@ -5319,15 +5287,19 @@ static NSHashTable *processedParentViews = nil;
 - (void)setText:(NSString *)text {
     %orig(text);
     
-    // 应用全局文字颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToTextField(self);
+    // 应用全局文字颜色（简化版）
+    if (gCurrentGlobalTextColorScheme && gCurrentGlobalTextColorScheme.length > 0) {
+        [DYYYUtils applyColorSettingsToTextField:self colorHexString:gCurrentGlobalTextColorScheme];
+    }
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
-    // 应用全局文字颜色到 attributedText（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToTextField(self);
+    // 应用全局文字颜色到 attributedText（简化版）
+    if (gCurrentGlobalTextColorScheme && gCurrentGlobalTextColorScheme.length > 0) {
+        [DYYYUtils applyColorSettingsToTextField:self colorHexString:gCurrentGlobalTextColorScheme];
+    }
 }
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
@@ -5352,15 +5324,19 @@ static NSHashTable *processedParentViews = nil;
 - (void)setText:(NSString *)text {
     %orig(text);
     
-    // 应用全局文字颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToTextView(self);
+    // 应用全局文字颜色（简化版）
+    if (gCurrentGlobalTextColorScheme && gCurrentGlobalTextColorScheme.length > 0) {
+        [DYYYUtils applyColorSettingsToTextView:self colorHexString:gCurrentGlobalTextColorScheme];
+    }
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
-    // 应用全局文字颜色到 attributedText（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToTextView(self);
+    // 应用全局文字颜色到 attributedText（简化版）
+    if (gCurrentGlobalTextColorScheme && gCurrentGlobalTextColorScheme.length > 0) {
+        [DYYYUtils applyColorSettingsToTextView:self colorHexString:gCurrentGlobalTextColorScheme];
+    }
 }
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
@@ -7914,18 +7890,16 @@ static void findTargetViewInView(UIView *view) {
 }
 
 %ctor {
-    // 初始化全局文字颜色缓存（已禁用，导致闪退）
-    // updateGlobalTextColorCache();
+    // 初始化全局文字颜色缓存
+    updateGlobalTextColorCache();
     
-    // 监听全局文字颜色变化（已禁用，导致闪退）
-    // if ([NSNotificationCenter respondsToSelector:@selector(addObserverForName:object:queue:usingBlock:)]) {
-    //     dyyyGlobalTextColorObserver = [[NSNotificationCenter defaultCenter] addObserverForName:kDYYYGlobalTextColorDidChangeNotification
-    //                                                                                              object:nil
-    //                                                                                               queue:[NSOperationQueue mainQueue]
-    //                                                                                          usingBlock:^(NSNotification *notification) {
-    //         updateGlobalTextColorCache();
-    //     }];
-    // }
+    // 监听全局文字颜色变化
+    [[NSNotificationCenter defaultCenter] addObserverForName:@"DYYYGlobalTextColorDidChangeNotification"
+                                                      object:nil
+                                                       queue:[NSOperationQueue mainQueue]
+                                                  usingBlock:^(NSNotification *notification) {
+        updateGlobalTextColorCache();
+    }];
     
     Class imMenuComponentClass = objc_getClass("AWEIMCustomMenuComponent");
     if (imMenuComponentClass) {
