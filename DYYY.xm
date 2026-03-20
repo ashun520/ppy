@@ -2215,43 +2215,7 @@ static BOOL isGestureActive = NO;
 }
 %end
 
-%hook UILabel
 
-- (void)setText:(NSString *)text {
-    UIView *superview = self.superview;
-
-    if ([superview isKindOfClass:%c(AFDFastSpeedView)] && text) {
-        CGFloat displaySpeed = isGestureActive && currentLongPressSpeed > 0 ? currentLongPressSpeed : DYYYGetFloat(@"DYYYLongPressSpeed");
-        if (displaySpeed == 0) {
-            displaySpeed = 2.0;
-        }
-
-        NSString *speedString = [NSString stringWithFormat:@"%.2f", displaySpeed];
-        if ([speedString hasSuffix:@".00"]) {
-            speedString = [speedString substringToIndex:speedString.length - 3];
-        } else if ([speedString hasSuffix:@"0"] && [speedString containsString:@"."]) {
-            speedString = [speedString substringToIndex:speedString.length - 1];
-        }
-
-        if ([text containsString:@"2"]) {
-            text = [text stringByReplacingOccurrencesOfString:@"2" withString:speedString];
-        }
-    }
-
-    %orig(text);
-    
-    // 应用全局文字颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToLabel(self);
-}
-
-- (void)awakeFromNib {
-    %orig;
-    
-    // 加载时应用颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToLabel(self);
-}
-
-%end
 
 // 强制启用保存他人头像
 %hook AFDProfileAvatarFunctionManager
@@ -3100,10 +3064,30 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 
 %end
 
-// 为所有UILabel添加颜色渲染
+// 为所有UILabel添加颜色渲染和倍速显示
 %hook UILabel
 
 - (void)setText:(NSString *)text {
+    UIView *superview = self.superview;
+
+    if ([superview isKindOfClass:%c(AFDFastSpeedView)] && text) {
+        CGFloat displaySpeed = isGestureActive && currentLongPressSpeed > 0 ? currentLongPressSpeed : DYYYGetFloat(@"DYYYLongPressSpeed");
+        if (displaySpeed == 0) {
+            displaySpeed = 2.0;
+        }
+
+        NSString *speedString = [NSString stringWithFormat:@"%.2f", displaySpeed];
+        if ([speedString hasSuffix:@".00"]) {
+            speedString = [speedString substringToIndex:speedString.length - 3];
+        } else if ([speedString hasSuffix:@"0"] && [speedString containsString:@"."]) {
+            speedString = [speedString substringToIndex:speedString.length - 1];
+        }
+
+        if ([text containsString:@"2"]) {
+            text = [text stringByReplacingOccurrencesOfString:@"2" withString:speedString];
+        }
+    }
+
     %orig(text);
     
     // 应用全局文字颜色和渐变色文字效果
@@ -5544,58 +5528,6 @@ static NSHashTable *processedParentViews = nil;
 
     %orig;
     [self updateDarkModeAppearance];
-}
-
-%end
-
-%hook UITextField
-
-- (void)setText:(NSString *)text {
-    %orig(text);
-    
-    // 应用全局文字颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToTextField(self);
-}
-
-- (void)willMoveToWindow:(UIWindow *)newWindow {
-    %orig;
-
-    if (newWindow) {
-        BOOL isDarkMode = [DYYYUtils isDarkMode];
-        self.keyboardAppearance = isDarkMode ? UIKeyboardAppearanceDark : UIKeyboardAppearanceLight;
-    }
-}
-
-- (BOOL)becomeFirstResponder {
-    BOOL isDarkMode = [DYYYUtils isDarkMode];
-    self.keyboardAppearance = isDarkMode ? UIKeyboardAppearanceDark : UIKeyboardAppearanceLight;
-    return %orig;
-}
-
-%end
-
-%hook UITextView
-
-- (void)setText:(NSString *)text {
-    %orig(text);
-    
-    // 应用全局文字颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToTextView(self);
-}
-
-- (void)willMoveToWindow:(UIWindow *)newWindow {
-    %orig;
-
-    if (newWindow) {
-        BOOL isDarkMode = [DYYYUtils isDarkMode];
-        self.keyboardAppearance = isDarkMode ? UIKeyboardAppearanceDark : UIKeyboardAppearanceLight;
-    }
-}
-
-- (BOOL)becomeFirstResponder {
-    BOOL isDarkMode = [DYYYUtils isDarkMode];
-    self.keyboardAppearance = isDarkMode ? UIKeyboardAppearanceDark : UIKeyboardAppearanceLight;
-    return %orig;
 }
 
 %end
