@@ -51,15 +51,19 @@ static void applyGlobalTextColorToView(UIView *view) {
     NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
     BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
     
-    // 获取第一个渐变颜色设置
+    // 获取启用的渐变颜色设置
     NSString *gradientScheme = nil;
     if (enableGradientText) {
         for (int i = 1; i <= 5; i++) {
-            NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
-            NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
-            if (colorValue && colorValue.length > 0) {
-                gradientScheme = colorValue;
-                break;
+            NSString *enableKey = [NSString stringWithFormat:@"DYYYEnableGradientTextColor%d", i];
+            BOOL enableGradient = [[NSUserDefaults standardUserDefaults] boolForKey:enableKey];
+            if (enableGradient) {
+                NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
+                NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
+                if (colorValue && colorValue.length > 0) {
+                    gradientScheme = colorValue;
+                    break;
+                }
             }
         }
     }
@@ -5851,6 +5855,12 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
     return %orig;
 }
 
+- (void)layoutSubviews {
+    %orig;
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
+}
+
 %end
 
 %hook AWENormalModeTabBarGeneralPlusButton
@@ -5945,8 +5955,7 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
                 });
             } else if ([labelText isEqualToString:@"我"] && selfTitle.length > 0) {
                 label.text = selfTitle;
-                dispatch_async(dispatch_get_main_queue(), ^{
-                  [self setNeedsLayout];
+                dispatch_async(dispatch_get_main_queue(), ^{    [self setNeedsLayout];
                 });
             }
         }
@@ -5954,6 +5963,9 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
     } @catch (NSException *exception) {
         return;
     }
+    
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
 }
 %end
 
