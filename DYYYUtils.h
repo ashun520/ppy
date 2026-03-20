@@ -141,6 +141,8 @@ NS_ASSUME_NONNULL_BEGIN
  *        - "HEX" 或 "#HEX": 返回一个单色方案。
  */
 + (void)applyColorSettingsToLabel:(UILabel *)label colorHexString:(NSString *)colorHexString;
++ (void)applyColorSettingsToTextField:(UITextField *)textField colorHexString:(NSString *)colorHexString;
++ (void)applyColorSettingsToTextView:(UITextView *)textView colorHexString:(NSString *)colorHexString;
 + (void)applyStrokeToLabel:(UILabel *)label strokeColor:(UIColor *)strokeColor strokeWidth:(CGFloat)strokeWidth;
 + (void)applyShadowToLabel:(UILabel *)label shadow:(NSShadow *)shadow;
 

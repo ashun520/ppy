@@ -832,6 +832,86 @@ static os_unfair_lock _staticColorCreationLock = OS_UNFAIR_LOCK_INIT;
     state.fontSize = fontSize;
 }
 
++ (void)applyColorSettingsToTextField:(UITextField *)textField colorHexString:(NSString *)colorHexString {
+    if (!textField)
+        return;
+
+    NSAttributedString *existingAttributed = nil;
+    if ([textField.attributedText isKindOfClass:[NSAttributedString class]] && textField.attributedText.length > 0) {
+        existingAttributed = textField.attributedText;
+    }
+
+    NSString *textSignature = existingAttributed ? existingAttributed.string : (textField.text ?: @"");
+    if (textSignature.length == 0) {
+        return;
+    }
+
+    UIFont *font = textField.font ?: [UIFont systemFontOfSize:[UIFont systemFontSize]];
+
+    NSMutableAttributedString *attributedText = nil;
+    if (existingAttributed) {
+        attributedText = [[NSMutableAttributedString alloc] initWithAttributedString:existingAttributed];
+    } else {
+        attributedText = [[NSMutableAttributedString alloc] initWithString:textSignature];
+    }
+
+    NSRange fullRange = NSMakeRange(0, attributedText.length);
+    [attributedText removeAttribute:NSForegroundColorAttributeName range:fullRange];
+
+    if (![attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:nil] && font) {
+        [attributedText addAttribute:NSFontAttributeName value:font range:fullRange];
+    }
+
+    if (colorHexString && colorHexString.length > 0) {
+        UIColor *textColor = [self colorFromSchemeHexString:colorHexString targetWidth:attributedText.length * 10];
+        if (textColor) {
+            [attributedText addAttribute:NSForegroundColorAttributeName value:textColor range:fullRange];
+        }
+    }
+
+    textField.attributedText = attributedText;
+}
+
++ (void)applyColorSettingsToTextView:(UITextView *)textView colorHexString:(NSString *)colorHexString {
+    if (!textView)
+        return;
+
+    NSAttributedString *existingAttributed = nil;
+    if ([textView.attributedText isKindOfClass:[NSAttributedString class]] && textView.attributedText.length > 0) {
+        existingAttributed = textView.attributedText;
+    }
+
+    NSString *textSignature = existingAttributed ? existingAttributed.string : (textView.text ?: @"");
+    if (textSignature.length == 0) {
+        return;
+    }
+
+    UIFont *font = textView.font ?: [UIFont systemFontOfSize:[UIFont systemFontSize]];
+
+    NSMutableAttributedString *attributedText = nil;
+    if (existingAttributed) {
+        attributedText = [[NSMutableAttributedString alloc] initWithAttributedString:existingAttributed];
+    } else {
+        attributedText = [[NSMutableAttributedString alloc] initWithString:textSignature];
+    }
+
+    NSRange fullRange = NSMakeRange(0, attributedText.length);
+    [attributedText removeAttribute:NSForegroundColorAttributeName range:fullRange];
+
+    if (![attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:nil] && font) {
+        [attributedText addAttribute:NSFontAttributeName value:font range:fullRange];
+    }
+
+    if (colorHexString && colorHexString.length > 0) {
+        UIColor *textColor = [self colorFromSchemeHexString:colorHexString targetWidth:attributedText.length * 10];
+        if (textColor) {
+            [attributedText addAttribute:NSForegroundColorAttributeName value:textColor range:fullRange];
+        }
+    }
+
+    textView.attributedText = attributedText;
+}
+
 + (void)applyStrokeToLabel:(UILabel *)label strokeColor:(UIColor *)strokeColor strokeWidth:(CGFloat)strokeWidth {
     if (!label || label.attributedText.length == 0) {
         return;

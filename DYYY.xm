@@ -2175,13 +2175,6 @@ static BOOL isGestureActive = NO;
     [self dyyy_applyGlobalTextColor];
 }
 
-- (void)layoutSubviews {
-    %orig;
-    
-    // 确保布局后颜色仍然生效
-    [self dyyy_applyGlobalTextColor];
-}
-
 - (void)awakeFromNib {
     %orig;
     
