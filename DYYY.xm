@@ -67,6 +67,22 @@ static void updateGlobalTextColorCache() {
     }
 }
 
+// UILabel Category 用于全局文字颜色
+@interface UILabel (DYYYGlobalTextColor)
+- (void)dyyy_applyGlobalTextColor;
+@end
+
+@implementation UILabel (DYYYGlobalTextColor)
+- (void)dyyy_applyGlobalTextColor {
+    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+        return;
+    }
+    
+    // 使用 DYYYUtils 的方法应用颜色方案
+    [DYYYUtils applyColorSettingsToLabel:self colorHexString:gCurrentGlobalTextColorScheme];
+}
+@end
+
 static NSDictionary<NSString *, NSString *> *DYYYTopTabTitleMapping(void) {
     static NSString *cachedRawValue = nil;
     static NSDictionary<NSString *, NSString *> *cachedMapping = nil;
@@ -2092,15 +2108,6 @@ static BOOL isGestureActive = NO;
 %end
 
 %hook UILabel
-
-%new- (void)dyyy_applyGlobalTextColor {
-    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
-        return;
-    }
-    
-    // 使用 DYYYUtils 的方法应用颜色方案
-    [DYYYUtils applyColorSettingsToLabel:self colorHexString:gCurrentGlobalTextColorScheme];
-}
 
 - (void)setText:(NSString *)text {
     UIView *superview = self.superview;
