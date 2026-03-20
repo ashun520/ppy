@@ -17,12 +17,14 @@ jobs:
       
     - name: Install Dependencies
       run: |
-        brew install make dpkg fakeroot
+        brew install make dpkg fakeroot ldid
         
     - name: Setup Theos
       run: |
         git clone --recursive https://github.com/theos/theos.git $HOME/theos
         echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+        # 设置 ld 路径，使用 ldid 进行签名
+        echo "$HOME/theos/bin" >> $GITHUB_PATH
         
     - name: Download iOS SDK
       run: |
