@@ -68,69 +68,38 @@ static void updateGlobalTextColorCache() {
     }
 }
 
-// UILabel Category 用于全局文字颜色
-@interface UILabel (DYYYGlobalTextColor)
-- (void)dyyy_applyGlobalTextColor;
-@end
-
-@implementation UILabel (DYYYGlobalTextColor)
-- (void)dyyy_applyGlobalTextColor {
-    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+// 辅助函数：应用全局文字颜色到 UILabel
+static void DYYYApplyGlobalTextColorToLabel(UILabel *label) {
+    if (!label || !gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
         return;
     }
     
-    // 使用 DYYYUtils 的方法应用颜色方案
-    [DYYYUtils applyColorSettingsToLabel:self colorHexString:gCurrentGlobalTextColorScheme];
+    [DYYYUtils applyColorSettingsToLabel:label colorHexString:gCurrentGlobalTextColorScheme];
 }
-@end
 
-// UITextField Category 用于全局文字颜色
-@interface UITextField (DYYYGlobalTextColor)
-- (void)dyyy_applyGlobalTextColor;
-@end
-
-@implementation UITextField (DYYYGlobalTextColor)
-- (void)dyyy_applyGlobalTextColor {
-    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+// 辅助函数：应用全局文字颜色到 UITextField
+static void DYYYApplyGlobalTextColorToTextField(UITextField *textField) {
+    if (!textField || !gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
         return;
     }
     
-    // 确保在主线程执行
-    if (![NSThread isMainThread]) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self dyyy_applyGlobalTextColor];
-        });
-        return;
-    }
-    
-    // 使用 DYYYUtils 的方法应用颜色方案
-    [DYYYUtils applyColorSettingsToTextField:self colorHexString:gCurrentGlobalTextColorScheme];
+    [DYYYUtils applyColorSettingsToTextField:textField colorHexString:gCurrentGlobalTextColorScheme];
 }
-@end
 
-// UITextView Category 用于全局文字颜色
-@interface UITextView (DYYYGlobalTextColor)
-- (void)dyyy_applyGlobalTextColor;
-@end
-
-@implementation UITextView (DYYYGlobalTextColor)
-- (void)dyyy_applyGlobalTextColor {
-    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+// 辅助函数：应用全局文字颜色到 UITextView
+static void DYYYApplyGlobalTextColorToTextView(UITextView *textView) {
+    if (!textView || !gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
         return;
     }
     
-    // 确保在主线程执行
-    if (![NSThread isMainThread]) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self dyyy_applyGlobalTextColor];
-        });
-        return;
-    }
-    
-    // 使用 DYYYUtils 的方法应用颜色方案
-    [DYYYUtils applyColorSettingsToTextView:self colorHexString:gCurrentGlobalTextColorScheme];
+    [DYYYUtils applyColorSettingsToTextView:textView colorHexString:gCurrentGlobalTextColorScheme];
 }
-@end
+
+// UILabel Category 用于全局文字颜色（已移除，使用辅助函数代替）
+
+// UITextField Category 用于全局文字颜色（已移除，使用辅助函数代替）
+
+// UITextView Category 用于全局文字颜色（已移除，使用辅助函数代替）
 
 static NSDictionary<NSString *, NSString *> *DYYYTopTabTitleMapping(void) {
     static NSString *cachedRawValue = nil;
@@ -2182,21 +2151,21 @@ static BOOL isGestureActive = NO;
     %orig(text);
     
     // 应用全局文字颜色
-    [self dyyy_applyGlobalTextColor];
+    DYYYApplyGlobalTextColorToLabel(self);
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
     // 应用全局文字颜色到 attributedText
-    [self dyyy_applyGlobalTextColor];
+    DYYYApplyGlobalTextColorToLabel(self);
 }
 
 - (void)awakeFromNib {
     %orig;
     
     // 加载时应用颜色
-    [self dyyy_applyGlobalTextColor];
+    DYYYApplyGlobalTextColorToLabel(self);
 }
 
 %end
@@ -5351,14 +5320,14 @@ static NSHashTable *processedParentViews = nil;
     %orig(text);
     
     // 应用全局文字颜色
-    [self dyyy_applyGlobalTextColor];
+    DYYYApplyGlobalTextColorToTextField(self);
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
     // 应用全局文字颜色到 attributedText
-    [self dyyy_applyGlobalTextColor];
+    DYYYApplyGlobalTextColorToTextField(self);
 }
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
@@ -5384,14 +5353,14 @@ static NSHashTable *processedParentViews = nil;
     %orig(text);
     
     // 应用全局文字颜色
-    [self dyyy_applyGlobalTextColor];
+    DYYYApplyGlobalTextColorToTextView(self);
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
     // 应用全局文字颜色到 attributedText
-    [self dyyy_applyGlobalTextColor];
+    DYYYApplyGlobalTextColorToTextView(self);
 }
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
