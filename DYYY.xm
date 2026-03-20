@@ -5620,6 +5620,9 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
 
     if ([self applyTabBarHeight])
         return;
+    
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
 
     BOOL hideShop = DYYYGetBool(@"DYYYHideShopButton");
     BOOL hideMsg = DYYYGetBool(@"DYYYHideMessageButton");
@@ -6112,6 +6115,9 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
             }
         }
     }
+    
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
