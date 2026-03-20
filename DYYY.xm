@@ -47,75 +47,76 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
 static void applyGlobalTextColorToView(UIView *view) {
     if (!view) return;
     
-    // 检查是否启用了全局文字颜色
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
-    
-    // 获取启用的渐变颜色设置
-    NSString *gradientScheme = nil;
-    if (enableGradientText) {
-        for (int i = 1; i <= 5; i++) {
-            NSString *enableKey = [NSString stringWithFormat:@"DYYYEnableGradientTextColor%d", i];
-            BOOL enableGradient = [[NSUserDefaults standardUserDefaults] boolForKey:enableKey];
-            if (enableGradient) {
-                NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
-                NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
-                if (colorValue && colorValue.length > 0) {
-                    gradientScheme = colorValue;
-                    break;
+    @try {
+        // 检查是否启用了全局文字颜色
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+        
+        // 获取启用的渐变颜色设置
+        NSString *gradientScheme = nil;
+        if (enableGradientText) {
+            for (int i = 1; i <= 5; i++) {
+                NSString *enableKey = [NSString stringWithFormat:@"DYYYEnableGradientTextColor%d", i];
+                BOOL enableGradient = [[NSUserDefaults standardUserDefaults] boolForKey:enableKey];
+                if (enableGradient) {
+                    NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
+                    NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
+                    if (colorValue && colorValue.length > 0) {
+                        gradientScheme = colorValue;
+                        break;
+                    }
                 }
             }
         }
+        
+        // 遍历所有子视图并应用颜色
+        applyColorToAllSubviews(view, globalTextColor, gradientScheme);
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] applyGlobalTextColorToView exception: %@", exception);
     }
-    
-    // 遍历所有子视图并应用颜色
-    applyColorToAllSubviews(view, globalTextColor, gradientScheme);
 }
 
 // 修复applyColorToAllSubviews函数，确保当gradientScheme为空字符串时，使用globalTextColor
 static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSString *gradientScheme) {
     if (!view) return;
     
-    // 应用到UILabel
-    if ([view isKindOfClass:[UILabel class]]) {
-        UILabel *label = (UILabel *)view;
-        if (label.text && label.text.length > 0) {
-            if (gradientScheme && gradientScheme.length > 0) {
-                [DYYYUtils applyColorSettingsToLabel:label colorHexString:gradientScheme];
-            } else if (globalTextColor && globalTextColor.length > 0) {
-                UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
-                if (color) {
-                    label.textColor = color;
+    @try {
+        // 应用到UILabel
+        if ([view isKindOfClass:[UILabel class]]) {
+            UILabel *label = (UILabel *)view;
+            if (label.text && label.text.length > 0) {
+                if (gradientScheme && gradientScheme.length > 0) {
+                    [DYYYUtils applyColorSettingsToLabel:label colorHexString:gradientScheme];
+                } else if (globalTextColor && globalTextColor.length > 0) {
+                    [DYYYUtils applyColorSettingsToLabel:label colorHexString:globalTextColor];
                 }
             }
         }
-    }
-    
-    // 应用到UITextField
-    if ([view isKindOfClass:[UITextField class]]) {
-        UITextField *textField = (UITextField *)view;
-        if (globalTextColor && globalTextColor.length > 0) {
-            UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
-            if (color) {
-                textField.textColor = color;
+        
+        // 应用到UITextField
+        if ([view isKindOfClass:[UITextField class]]) {
+            UITextField *textField = (UITextField *)view;
+            if (globalTextColor && globalTextColor.length > 0) {
+                [DYYYUtils applyColorSettingsToTextField:textField colorHexString:globalTextColor];
             }
         }
-    }
-    
-    // 应用到UITextView
-    if ([view isKindOfClass:[UITextView class]]) {
-        UITextView *textView = (UITextView *)view;
-        if (globalTextColor && globalTextColor.length > 0) {
-            UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
-            if (color) {
-                textView.textColor = color;
+        
+        // 应用到UITextView
+        if ([view isKindOfClass:[UITextView class]]) {
+            UITextView *textView = (UITextView *)view;
+            if (globalTextColor && globalTextColor.length > 0) {
+                [DYYYUtils applyColorSettingsToTextView:textView colorHexString:globalTextColor];
             }
         }
-    }
-    
-    // 递归处理子视图
-    for (UIView *subview in view.subviews) {
-        applyColorToAllSubviews(subview, globalTextColor, gradientScheme);
+        
+        // 递归处理子视图
+        for (UIView *subview in view.subviews) {
+            applyColorToAllSubviews(subview, globalTextColor, gradientScheme);
+        }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] applyColorToAllSubviews exception: %@", exception);
     }
 }
 
@@ -3005,15 +3006,25 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 - (void)layoutSubviews {
     %orig;
     
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView((UIView *)self);
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        applyGlobalTextColorToView((UIView *)self);
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] AWEIMReusableCommonCell layoutSubviews exception: %@", exception);
+    }
 }
 
 - (void)setCurrentContext:(id)currentContext {
     %orig(currentContext);
     
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView((UIView *)self);
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        applyGlobalTextColorToView((UIView *)self);
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] AWEIMReusableCommonCell setCurrentContext exception: %@", exception);
+    }
 }
 
 %end
@@ -3039,15 +3050,25 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 - (void)layoutSubviews {
     %orig;
     
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView((UIView *)self);
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        applyGlobalTextColorToView((UIView *)self);
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] AWECommentCell layoutSubviews exception: %@", exception);
+    }
 }
 
 - (void)setModel:(id)model {
     %orig(model);
     
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView((UIView *)self);
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        applyGlobalTextColorToView((UIView *)self);
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] AWECommentCell setModel exception: %@", exception);
+    }
 }
 
 %end
@@ -3058,8 +3079,13 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 - (void)viewDidLayoutSubviews {
     %orig;
     
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        applyGlobalTextColorToView(self.view);
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] AWECommentInputViewController viewDidLayoutSubviews exception: %@", exception);
+    }
 }
 
 %end
@@ -3090,31 +3116,41 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 
     %orig(text);
     
-    // 应用全局文字颜色和渐变色文字效果
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
-    
-    if (globalTextColor && globalTextColor.length > 0) {
-        if (enableGradientText) {
-            [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
-        } else {
-            UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:self.bounds.size.width];
-            if (color) {
-                self.textColor = color;
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+        
+        if (globalTextColor && globalTextColor.length > 0) {
+            if (enableGradientText) {
+                [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
+            } else {
+                UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:self.bounds.size.width];
+                if (color) {
+                    self.textColor = color;
+                }
             }
         }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] UILabel setText exception: %@", exception);
     }
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
-    // 应用全局文字颜色和渐变色文字效果
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
-    
-    if (globalTextColor && globalTextColor.length > 0 && enableGradientText) {
-        [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+        
+        if (globalTextColor && globalTextColor.length > 0 && enableGradientText) {
+            [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
+        }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] UILabel setAttributedText exception: %@", exception);
     }
 }
 
@@ -3126,20 +3162,30 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 - (void)setText:(NSString *)text {
     %orig(text);
     
-    // 应用全局文字颜色和渐变色文字效果
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0) {
-        [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        if (globalTextColor && globalTextColor.length > 0) {
+            [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
+        }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] UITextView setText exception: %@", exception);
     }
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
-    // 应用全局文字颜色和渐变色文字效果
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0) {
-        [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        if (globalTextColor && globalTextColor.length > 0) {
+            [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
+        }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] UITextView setAttributedText exception: %@", exception);
     }
 }
 
@@ -3151,20 +3197,30 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 - (void)setText:(NSString *)text {
     %orig(text);
     
-    // 应用全局文字颜色和渐变色文字效果
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0) {
-        [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        if (globalTextColor && globalTextColor.length > 0) {
+            [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
+        }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] UITextField setText exception: %@", exception);
     }
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText {
     %orig(attributedText);
     
-    // 应用全局文字颜色和渐变色文字效果
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0) {
-        [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
+    @try {
+        // 应用全局文字颜色和渐变色文字效果
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        if (globalTextColor && globalTextColor.length > 0) {
+            [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
+        }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        NSLog(@"[DYYY] UITextField setAttributedText exception: %@", exception);
     }
 }
 
