@@ -40,6 +40,9 @@ static NSString *const kDYYYTabBarHeightKey = @"DYYYTabBarHeight";
 static char kDYYYGlobalTransparencyBaseAlphaKey;
 static NSInteger dyyyGlobalTransparencyMutationDepth = 0;
 
+// 前向声明
+static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSString *gradientScheme);
+
 // 全局文字颜色和渐变色文字效果
 static void applyGlobalTextColorToView(UIView *view) {
     if (!view) return;
