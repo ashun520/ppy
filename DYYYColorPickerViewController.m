@@ -1,6 +1,8 @@
 #import "DYYYColorPickerViewController.h"
 
-@interface DYYYColorPickerViewController () <UITableViewDelegate, UITableViewDataSource>
+@interface DYYYColorPickerViewController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate>
+@property (nonatomic, strong) NSMutableArray *customColors;
+@property (nonatomic, strong) UITextField *customColorField;
 @end
 
 @implementation DYYYColorPickerViewController
@@ -10,8 +12,18 @@
     self.title = @"全局文字颜色";
     self.view.backgroundColor = self.isDarkMode ? [UIColor blackColor] : [UIColor whiteColor];
     
+    [self loadCustomColors];
     [self setupPresetColors];
     [self setupTableView];
+    [self setupCustomColorInput];
+}
+
+- (void)loadCustomColors {
+    self.customColors = [[NSUserDefaults standardUserDefaults] arrayForKey:@"DYYYSavedCustomColors"] ?: [NSMutableArray array];
+}
+
+- (void)saveCustomColors {
+    [[NSUserDefaults standardUserDefaults] setObject:self.customColors forKey:@"DYYYSavedCustomColors"];
 }
 
 - (void)setupPresetColors {
@@ -40,15 +52,52 @@
 }
 
 - (void)setupTableView {
-    self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height - 100) style:UITableViewStylePlain];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:self.tableView];
 }
 
+- (void)setupCustomColorInput {
+    UIView *inputView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - 100, self.view.bounds.size.width, 100)];
+    inputView.backgroundColor = self.isDarkMode ? [UIColor colorWithRed:0.2 green:0.2 blue:0.2 alpha:1.0] : [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.0];
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(15, 10, self.view.bounds.size.width - 30, 20)];
+    label.text = @"自定义颜色（十六进制）";
+    label.font = [UIFont systemFontOfSize:14];
+    label.textColor = self.isDarkMode ? [UIColor whiteColor] : [UIColor blackColor];
+    [inputView addSubview:label];
+    
+    self.customColorField = [[UITextField alloc] initWithFrame:CGRectMake(15, 35, self.view.bounds.size.width - 100, 40)];
+    self.customColorField.placeholder = @"#RRGGBB 或 #RRGGBB,#RRGGBB";
+    self.customColorField.font = [UIFont systemFontOfSize:15];
+    self.customColorField.borderStyle = UITextBorderStyleRoundedRect;
+    self.customColorField.delegate = self;
+    self.customColorField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    self.customColorField.autocorrectionType = UITextAutocorrectionTypeNo;
+    [inputView addSubview:self.customColorField];
+    
+    UIButton *previewButton = [[UIButton alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 75, 35, 60, 40)];
+    [previewButton setTitle:@"预览" forState:UIControlStateNormal];
+    previewButton.backgroundColor = [UIColor colorWithRed:0.2 green:0.5 blue:1.0 alpha:1.0];
+    [previewButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    previewButton.layer.cornerRadius = 5;
+    [previewButton addTarget:self action:@selector(previewCustomColor) forControlEvents:UIControlEventTouchUpInside];
+    [inputView addSubview:previewButton];
+    
+    UIButton *saveButton = [[UIButton alloc] initWithFrame:CGRectMake(15, 80, self.view.bounds.size.width - 30, 15)];
+    [saveButton setTitle:@"保存到自定义列表" forState:UIControlStateNormal];
+    [saveButton setTitleColor:[UIColor colorWithRed:0.2 green:0.5 blue:1.0 alpha:1.0] forState:UIControlStateNormal];
+    saveButton.titleLabel.font = [UIFont systemFontOfSize:13];
+    [saveButton addTarget:self action:@selector(saveCustomColor) forControlEvents:UIControlEventTouchUpInside];
+    [inputView addSubview:saveButton];
+    
+    [self.view addSubview:inputView];
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.presetColors.count;
+    return self.presetColors.count + self.customColors.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -58,7 +107,13 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellID];
     }
     
-    NSDictionary *colorInfo = self.presetColors[indexPath.row];
+    NSDictionary *colorInfo;
+    if (indexPath.row < self.presetColors.count) {
+        colorInfo = self.presetColors[indexPath.row];
+    } else {
+        colorInfo = self.customColors[indexPath.row - self.presetColors.count];
+    }
+    
     cell.textLabel.text = colorInfo[@"name"];
     cell.detailTextLabel.text = colorInfo[@"scheme"];
     
@@ -68,7 +123,12 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    NSDictionary *colorInfo = self.presetColors[indexPath.row];
+    NSDictionary *colorInfo;
+    if (indexPath.row < self.presetColors.count) {
+        colorInfo = self.presetColors[indexPath.row];
+    } else {
+        colorInfo = self.customColors[indexPath.row - self.presetColors.count];
+    }
     NSString *colorScheme = colorInfo[@"scheme"];
     
     if (self.colorSelectedHandler) {
@@ -76,6 +136,73 @@
     }
     
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    return YES;
+}
+
+- (void)previewCustomColor {
+    NSString *inputColor = self.customColorField.text;
+    if (![self validateColorFormat:inputColor]) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"格式错误" message:@"请输入有效的十六进制颜色代码\n格式：#RRGGBB 或 #RRGGBB,#RRGGBB" preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+    
+    if (self.colorSelectedHandler) {
+        self.colorSelectedHandler(inputColor);
+    }
+    
+    UIAlertController *preview = [UIAlertController alertControllerWithTitle:@"预览效果" message:[NSString stringWithFormat:@"颜色方案：%@\n已应用，部分文字可能需要重新加载", inputColor] preferredStyle:UIAlertControllerStyleAlert];
+    [preview addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    [self presentViewController:preview animated:YES completion:nil];
+}
+
+- (void)saveCustomColor {
+    NSString *inputColor = self.customColorField.text;
+    if (![self validateColorFormat:inputColor]) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"格式错误" message:@"请输入有效的十六进制颜色代码" preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+    
+    NSString *colorName = [NSString stringWithFormat:@"自定义颜色 %@", inputColor];
+    NSDictionary *customColor = @{@"name": colorName, @"scheme": inputColor};
+    [self.customColors addObject:customColor];
+    [self saveCustomColors];
+    
+    [self.tableView reloadData];
+    
+    UIAlertController *saved = [UIAlertController alertControllerWithTitle:@"保存成功" message:@"自定义颜色已保存到列表" preferredStyle:UIAlertControllerStyleAlert];
+    [saved addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    [self presentViewController:saved animated:YES completion:nil];
+    
+    self.customColorField.text = @"";
+}
+
+- (BOOL)validateColorFormat:(NSString *)colorString {
+    if (!colorString || colorString.length == 0) {
+        return NO;
+    }
+    
+    NSArray *colors = [colorString componentsSeparatedByString:@","];
+    if (colors.count == 0 || colors.count > 5) {
+        return NO;
+    }
+    
+    NSRegularExpression *hexPattern = [NSRegularExpression regularExpressionWithPattern:@"^#([0-9A-Fa-f]{6})$" options:0 error:nil];
+    
+    for (NSString *color in colors) {
+        NSString *trimmedColor = [color stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (![hexPattern matchesInString:trimmedColor options:0 range:NSMakeRange(0, trimmedColor.length)]) {
+            return NO;
+        }
+    }
+    
+    return YES;
 }
 
 @end
