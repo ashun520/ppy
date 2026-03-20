@@ -5842,8 +5842,9 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
         NSString *friendsTitle = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYFriendsTitle"];
         NSString *msgTitle = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYMsgTitle"];
         NSString *selfTitle = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYSelfTitle"];
+        NSString *bottomShopTitle = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYBottomShopTitle"];
 
-        if (!(indexTitle.length || friendsTitle.length || msgTitle.length || selfTitle.length)) {
+        if (!(indexTitle.length || friendsTitle.length || msgTitle.length || selfTitle.length || bottomShopTitle.length)) {
             return;
         }
 
@@ -5904,6 +5905,11 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
             } else if ([labelText isEqualToString:@"我"] && selfTitle.length > 0) {
                 label.text = selfTitle;
                 dispatch_async(dispatch_get_main_queue(), ^{    [self setNeedsLayout];
+                });
+            } else if ([labelText isEqualToString:@"商城"] && bottomShopTitle.length > 0) {
+                label.text = bottomShopTitle;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  [self setNeedsLayout];
                 });
             }
         }
