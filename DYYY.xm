@@ -962,11 +962,16 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 - (void)makeKeyAndVisible {
     %orig;
 
+    // 应用全局文字颜色和渐变色文字效果
+    dispatch_async(dispatch_get_main_queue(), ^{  
+      applyGlobalTextColorToView(self);
+    });
+
     if (!isFloatSpeedButtonEnabled)
         return;
 
     if (speedButton && ![speedButton isDescendantOfView:self]) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{  
           [self addSubview:speedButton];
           [speedButton loadSavedPosition];
           [speedButton resetFadeTimer];
@@ -975,6 +980,14 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 }
 %end
 
+%end
+
+%hook UIViewController
+- (void)viewDidAppear:(BOOL)animated {
+    %orig(animated);
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
+}
 %end
 
 %hook AWEBaseListViewController

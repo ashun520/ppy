@@ -133,7 +133,6 @@ typedef NS_ENUM(NSInteger, DYYYSettingItemType) { DYYYSettingItemTypeSwitch, DYY
     self.settingSections = @[
         @[
             [DYYYSettingItem itemWithTitle:@"视频背景颜色" key:@"DYYYVideoBGColor" type:DYYYSettingItemTypeTextField placeholder:@"十六进制"],
-            [DYYYSettingItem itemWithTitle:@"全局文字颜色" key:@"DYYYGlobalTextColor" type:DYYYSettingItemTypePicker],
             [DYYYSettingItem itemWithTitle:@"启用弹幕改色" key:@"DYYYEnableDanmuColor" type:DYYYSettingItemTypeSwitch],
             [DYYYSettingItem itemWithTitle:@"自定弹幕颜色" key:@"DYYYDanmuColor" type:DYYYSettingItemTypeTextField placeholder:@"十六进制"],
             [DYYYSettingItem itemWithTitle:@"设置默认倍速" key:@"DYYYDefaultSpeed" type:DYYYSettingItemTypePicker],
