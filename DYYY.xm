@@ -22,6 +22,7 @@
 #import "DYYYSettingViewController.h"
 #import "DYYYToast.h"
 #import "DYYYUtils.h"
+#import "DYYYColorPickerViewController.h"
 
 static CGFloat gStartY = 0.0;
 static CGFloat gStartVal = 0.0;
@@ -50,6 +51,20 @@ static void updateGlobalTransparencyCache() {
         }
     }
     gGlobalTransparency = kInvalidAlpha;
+}
+
+// 全局文字颜色相关变量
+static NSString *const kDYYYGlobalTextColorKey = @"DYYYGlobalTextColor";
+static NSString *const kDYYYGlobalTextColorDidChangeNotification = @"DYYYGlobalTextColorDidChangeNotification";
+static NSString *gCurrentGlobalTextColorScheme = nil;
+
+static void updateGlobalTextColorCache() {
+    NSString *colorScheme = DYYYGetString(kDYYYGlobalTextColorKey);
+    if (colorScheme.length > 0) {
+        gCurrentGlobalTextColorScheme = [colorScheme copy];
+    } else {
+        gCurrentGlobalTextColorScheme = nil;
+    }
 }
 
 static NSDictionary<NSString *, NSString *> *DYYYTopTabTitleMapping(void) {
@@ -2100,7 +2115,21 @@ static BOOL isGestureActive = NO;
     }
 
     %orig(text);
+    
+    // 应用全局文字颜色
+    [self dyyy_applyGlobalTextColor];
 }
+
+%new
+- (void)dyyy_applyGlobalTextColor {
+    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+        return;
+    }
+    
+    // 使用 DYYYUtils 的方法应用颜色方案
+    [DYYYUtils applyColorSettingsToLabel:self colorHexString:gCurrentGlobalTextColorScheme];
+}
+
 %end
 
 // 强制启用保存他人头像
@@ -7819,6 +7848,17 @@ static void findTargetViewInView(UIView *view) {
 }
 
 %ctor {
+    // 初始化全局文字颜色缓存
+    updateGlobalTextColorCache();
+    
+    // 监听全局文字颜色变化
+    [[NSNotificationCenter defaultCenter] addObserverForName:kDYYYGlobalTextColorDidChangeNotification
+                                                      object:nil
+                                                       queue:[NSOperationQueue mainQueue]
+                                                  usingBlock:^(NSNotification *notification) {
+        updateGlobalTextColorCache();
+    }];
+    
     Class imMenuComponentClass = objc_getClass("AWEIMCustomMenuComponent");
     if (imMenuComponentClass) {
         SEL legacySelector = NSSelectorFromString(@"msg_showMenuForBubbleFrameInScreen:tapLocationInScreen:menuItemList:moreEmoticon:onCell:extra:");
