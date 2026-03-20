@@ -2093,6 +2093,15 @@ static BOOL isGestureActive = NO;
 
 %hook UILabel
 
+%new- (void)dyyy_applyGlobalTextColor {
+    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+        return;
+    }
+    
+    // 使用 DYYYUtils 的方法应用颜色方案
+    [DYYYUtils applyColorSettingsToLabel:self colorHexString:gCurrentGlobalTextColorScheme];
+}
+
 - (void)setText:(NSString *)text {
     UIView *superview = self.superview;
 
@@ -2118,16 +2127,6 @@ static BOOL isGestureActive = NO;
     
     // 应用全局文字颜色
     [self dyyy_applyGlobalTextColor];
-}
-
-%new
-- (void)dyyy_applyGlobalTextColor {
-    if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
-        return;
-    }
-    
-    // 使用 DYYYUtils 的方法应用颜色方案
-    [DYYYUtils applyColorSettingsToLabel:self colorHexString:gCurrentGlobalTextColorScheme];
 }
 
 %end
