@@ -40,6 +40,49 @@ static NSString *const kDYYYTabBarHeightKey = @"DYYYTabBarHeight";
 static char kDYYYGlobalTransparencyBaseAlphaKey;
 static NSInteger dyyyGlobalTransparencyMutationDepth = 0;
 
+// 全局文字颜色和渐变色文字效果
+static void applyGlobalTextColorToView(UIView *view) {
+    // 检查是否启用了全局文字颜色
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0) {
+        UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
+        if (color) {
+            [DYYYUtils applyTextColorRecursively:color inView:view shouldExcludeViewBlock:^BOOL(UIView *subview) {
+                // 排除某些不需要改变颜色的视图
+                return NO;
+            }];
+        }
+    }
+    
+    // 检查是否启用了渐变色文字
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"]) {
+        NSMutableArray *gradientColors = [NSMutableArray array];
+        
+        // 收集所有设置的渐变色
+        for (int i = 1; i <= 5; i++) {
+            NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
+            NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
+            if (colorValue && colorValue.length > 0) {
+                [gradientColors addObject:colorValue];
+            }
+        }
+        
+        // 至少需要两种颜色才能创建渐变
+        if (gradientColors.count >= 2) {
+            // 构建渐变方案字符串
+            NSString *gradientScheme = [gradientColors componentsJoinedByString:@","];
+            
+            // 遍历所有UILabel并应用渐变色
+            NSArray *labels = [DYYYUtils findAllSubviewsOfClass:[UILabel class] inContainer:view];
+            for (UILabel *label in labels) {
+                if (label.text && label.text.length > 0) {
+                    [DYYYUtils applyColorSettingsToLabel:label colorHexString:gradientScheme];
+                }
+            }
+        }
+    }
+}
+
 static void updateGlobalTransparencyCache() {
     NSString *transparentValue = DYYYGetString(kDYYYGlobalTransparencyKey);
     if (transparentValue.length > 0) {
@@ -938,6 +981,8 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 - (void)viewDidLayoutSubviews {
     %orig;
     [self applyBlurEffectIfNeeded];
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
 }
 
 %new
