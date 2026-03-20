@@ -68,7 +68,7 @@ static void applyGlobalTextColorToView(UIView *view) {
     applyColorToAllSubviews(view, globalTextColor, gradientScheme);
 }
 
-// 递归应用颜色到所有子视图
+// 修复applyColorToAllSubviews函数，确保当gradientScheme为空字符串时，使用globalTextColor
 static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSString *gradientScheme) {
     if (!view) return;
     
@@ -76,7 +76,7 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
     if ([view isKindOfClass:[UILabel class]]) {
         UILabel *label = (UILabel *)view;
         if (label.text && label.text.length > 0) {
-            if (gradientScheme) {
+            if (gradientScheme && gradientScheme.length > 0) {
                 [DYYYUtils applyColorSettingsToLabel:label colorHexString:gradientScheme];
             } else if (globalTextColor && globalTextColor.length > 0) {
                 UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
@@ -114,6 +114,8 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
         applyColorToAllSubviews(subview, globalTextColor, gradientScheme);
     }
 }
+
+
 
 static void updateGlobalTransparencyCache() {
     NSString *transparentValue = DYYYGetString(kDYYYGlobalTransparencyKey);
