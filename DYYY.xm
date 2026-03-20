@@ -6175,65 +6175,6 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
     updateClearButtonVisibility();
 }
 
-- (void)viewDidLayoutSubviews {
-    %orig;
-
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
-
-    if (!DYYYGetBool(@"DYYYEnableCommentBlur"))
-        return;
-
-    Class containerViewClass = NSClassFromString(@"AWECommentInputViewSwiftImpl.CommentInputContainerView");
-    NSArray<UIView *> *containerViews = [DYYYUtils findAllSubviewsOfClass:containerViewClass inContainer:self.view];
-    for (UIView *containerView in containerViews) {
-        for (UIView *subview in containerView.subviews) {
-            if (subview.hidden == NO && subview.backgroundColor && CGColorGetAlpha(subview.backgroundColor.CGColor) == 1) {
-                float userTransparency = [[[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYCommentBlurTransparent"] floatValue];
-                if (userTransparency <= 0 || userTransparency > 1) {
-                    userTransparency = 0.8;
-                }
-                [DYYYUtils applyBlurEffectToView:subview transparency:userTransparency blurViewTag:999];
-            }
-        }
-    }
-
-    Class middleContainerClass = NSClassFromString(@"AWECommentInputViewSwiftImpl.CommentInputViewMiddleContainer");
-    NSArray<UIView *> *middleContainers = [DYYYUtils findAllSubviewsOfClass:middleContainerClass inContainer:self.view];
-    for (UIView *middleContainer in middleContainers) {
-        BOOL containsDanmu = NO;
-        for (UIView *innerSubviewCheck in middleContainer.subviews) {
-            if ([innerSubviewCheck isKindOfClass:[UILabel class]] && [((UILabel *)innerSubviewCheck).text containsString:@"弹幕"]) {
-                containsDanmu = YES;
-                break;
-            }
-        }
-
-        if (containsDanmu) {
-            UIView *parentView = middleContainer.superview;
-            for (UIView *innerSubview in parentView.subviews) {
-                if ([innerSubview isKindOfClass:[UIView class]]) {
-                    if (innerSubview.subviews.count > 0) {
-                        innerSubview.subviews[0].hidden = YES;
-                    }
-
-                    UIView *whiteBackgroundView = [[UIView alloc] initWithFrame:innerSubview.bounds];
-                    whiteBackgroundView.backgroundColor = [UIColor whiteColor];
-                    whiteBackgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-                    [innerSubview addSubview:whiteBackgroundView];
-                    break;
-                }
-            }
-        } else {
-            for (UIView *subview in middleContainer.subviews) {
-                if (subview.hidden == NO && subview.backgroundColor && CGColorGetAlpha(subview.backgroundColor.CGColor) == 1) {
-                    [DYYYUtils applyBlurEffectToView:subview transparency:0.2f blurViewTag:999];
-                }
-            }
-        }
-    }
-}
-
 %end
 
 // 开启评论区毛玻璃后滚动区域填满底部
