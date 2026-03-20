@@ -57,6 +57,7 @@ static void updateGlobalTransparencyCache() {
 static NSString *const kDYYYGlobalTextColorKey = @"DYYYGlobalTextColor";
 static NSString *const kDYYYGlobalTextColorDidChangeNotification = @"DYYYGlobalTextColorDidChangeNotification";
 static NSString *gCurrentGlobalTextColorScheme = nil;
+static id dyyyGlobalTextColorObserver = nil;
 
 static void updateGlobalTextColorCache() {
     NSString *colorScheme = DYYYGetString(kDYYYGlobalTextColorKey);
@@ -94,6 +95,14 @@ static void updateGlobalTextColorCache() {
         return;
     }
     
+    // 确保在主线程执行
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self dyyy_applyGlobalTextColor];
+        });
+        return;
+    }
+    
     // 使用 DYYYUtils 的方法应用颜色方案
     [DYYYUtils applyColorSettingsToTextField:self colorHexString:gCurrentGlobalTextColorScheme];
 }
@@ -107,6 +116,14 @@ static void updateGlobalTextColorCache() {
 @implementation UITextView (DYYYGlobalTextColor)
 - (void)dyyy_applyGlobalTextColor {
     if (!gCurrentGlobalTextColorScheme || gCurrentGlobalTextColorScheme.length == 0) {
+        return;
+    }
+    
+    // 确保在主线程执行
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self dyyy_applyGlobalTextColor];
+        });
         return;
     }
     
@@ -7931,13 +7948,15 @@ static void findTargetViewInView(UIView *view) {
     // 初始化全局文字颜色缓存
     updateGlobalTextColorCache();
     
-    // 监听全局文字颜色变化
-    [[NSNotificationCenter defaultCenter] addObserverForName:kDYYYGlobalTextColorDidChangeNotification
-                                                      object:nil
-                                                       queue:[NSOperationQueue mainQueue]
-                                                  usingBlock:^(NSNotification *notification) {
-        updateGlobalTextColorCache();
-    }];
+    // 监听全局文字颜色变化（安全方式）
+    if ([NSNotificationCenter respondsToSelector:@selector(addObserverForName:object:queue:usingBlock:)]) {
+        dyyyGlobalTextColorObserver = [[NSNotificationCenter defaultCenter] addObserverForName:kDYYYGlobalTextColorDidChangeNotification
+                                                                                         object:nil
+                                                                                          queue:[NSOperationQueue mainQueue]
+                                                                                     usingBlock:^(NSNotification *notification) {
+            updateGlobalTextColorCache();
+        }];
+    }
     
     Class imMenuComponentClass = objc_getClass("AWEIMCustomMenuComponent");
     if (imMenuComponentClass) {
