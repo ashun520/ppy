@@ -3061,6 +3061,138 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 
 %end
 
+// 为评论列表单元格添加颜色渲染
+%hook AWECommentModel
+
+- (void)setContent:(NSString *)content {
+    %orig(content);
+    
+    // 应用全局文字颜色和渐变色文字效果到评论内容
+    UIView *parentView = [[UIApplication sharedApplication] keyWindow];
+    if (parentView) {
+        applyGlobalTextColorToView(parentView);
+    }
+}
+
+%end
+
+// 为评论单元格添加颜色渲染
+%hook AWECommentCell
+
+- (void)layoutSubviews {
+    %orig;
+    
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
+}
+
+- (void)setModel:(id)model {
+    %orig(model);
+    
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
+}
+
+%end
+
+// 为评论输入视图添加颜色渲染
+%hook AWECommentInputViewController
+
+- (void)viewDidLayoutSubviews {
+    %orig;
+    
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
+}
+
+%end
+
+// 为所有UILabel添加颜色渲染
+%hook UILabel
+
+- (void)setText:(NSString *)text {
+    %orig(text);
+    
+    // 应用全局文字颜色和渐变色文字效果
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+    
+    if (globalTextColor && globalTextColor.length > 0) {
+        if (enableGradientText) {
+            [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
+        } else {
+            UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:self.bounds.size.width];
+            if (color) {
+                self.textColor = color;
+            }
+        }
+    }
+}
+
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    %orig(attributedText);
+    
+    // 应用全局文字颜色和渐变色文字效果
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+    
+    if (globalTextColor && globalTextColor.length > 0 && enableGradientText) {
+        [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
+    }
+}
+
+%end
+
+// 为所有UITextView添加颜色渲染
+%hook UITextView
+
+- (void)setText:(NSString *)text {
+    %orig(text);
+    
+    // 应用全局文字颜色和渐变色文字效果
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0) {
+        [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
+    }
+}
+
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    %orig(attributedText);
+    
+    // 应用全局文字颜色和渐变色文字效果
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0) {
+        [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
+    }
+}
+
+%end
+
+// 为所有UITextField添加颜色渲染
+%hook UITextField
+
+- (void)setText:(NSString *)text {
+    %orig(text);
+    
+    // 应用全局文字颜色和渐变色文字效果
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0) {
+        [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
+    }
+}
+
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    %orig(attributedText);
+    
+    // 应用全局文字颜色和渐变色文字效果
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0) {
+        [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
+    }
+}
+
+%end
+
 // 隐藏合集和声明
 %hook AWEAntiAddictedNoticeBarView
 - (void)layoutSubviews {

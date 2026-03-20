@@ -626,18 +626,29 @@ typedef NS_ENUM(NSInteger, DYYYSettingItemType) { DYYYSettingItemTypeSwitch, DYY
     
     // 为特定设置项添加图标
     if ([item.key isEqualToString:@"DYYYGlobalTextColor"]) {
-        UIImageView *iconView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
-        iconView.image = [UIImage systemImageNamed:@"textformat"];
-        iconView.tintColor = [UIColor whiteColor];
-        cell.imageView.image = iconView.image;
+        UIImage *iconImage = [UIImage systemImageNamed:@"text.below.photo"];
+        if (iconImage) {
+            cell.imageView.image = iconImage;
+            cell.imageView.tintColor = [UIColor whiteColor];
+            cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        }
     } else if ([item.key isEqualToString:@"DYYYEnableGradientText"]) {
-        UIImageView *iconView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
-        iconView.image = [UIImage systemImageNamed:@"gradient"];
-        iconView.tintColor = [UIColor whiteColor];
-        cell.imageView.image = iconView.image;
+        UIImage *iconImage = [UIImage systemImageNamed:@"paintpalette"];
+        if (iconImage) {
+            cell.imageView.image = iconImage;
+            cell.imageView.tintColor = [UIColor whiteColor];
+            cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        }
     } else {
         cell.imageView.image = nil;
     }
+    
+    // 确保imageView有正确的布局
+    cell.imageView.frame = CGRectMake(16, 12, 20, 20);
+    cell.textLabel.frame = CGRectMake(44, 12, cell.contentView.bounds.size.width - 100, 20);
+    
+    // 确保imageView可见
+    cell.imageView.hidden = NO;
 
     cell.backgroundView = nil;
 

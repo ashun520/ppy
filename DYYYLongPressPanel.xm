@@ -7,6 +7,57 @@
 #import "DYYYManager.h"
 #import "DYYYToast.h"
 #import "DYYYUtils.h"
+#import "DYYYColorPickerViewController.h"
+
+// 前向声明
+static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSString *gradientScheme);
+
+// 应用颜色到所有子视图
+static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSString *gradientScheme) {
+    if (!view) return;
+    
+    // 应用到UILabel
+    if ([view isKindOfClass:[UILabel class]]) {
+        UILabel *label = (UILabel *)view;
+        if (label.text && label.text.length > 0) {
+            if (gradientScheme && gradientScheme.length > 0) {
+                [DYYYUtils applyColorSettingsToLabel:label colorHexString:gradientScheme];
+            } else if (globalTextColor && globalTextColor.length > 0) {
+                UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
+                if (color) {
+                    label.textColor = color;
+                }
+            }
+        }
+    }
+    
+    // 应用到UITextField
+    if ([view isKindOfClass:[UITextField class]]) {
+        UITextField *textField = (UITextField *)view;
+        if (globalTextColor && globalTextColor.length > 0) {
+            UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
+            if (color) {
+                textField.textColor = color;
+            }
+        }
+    }
+    
+    // 应用到UITextView
+    if ([view isKindOfClass:[UITextView class]]) {
+        UITextView *textView = (UITextView *)view;
+        if (globalTextColor && globalTextColor.length > 0) {
+            UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
+            if (color) {
+                textView.textColor = color;
+            }
+        }
+    }
+    
+    // 递归处理子视图
+    for (UIView *subview in view.subviews) {
+        applyColorToAllSubviews(subview, globalTextColor, gradientScheme);
+    }
+}
 
 %hook AWELongPressPanelViewGroupModel
 %property(nonatomic, assign) BOOL isDYYYCustomGroup;
@@ -704,6 +755,65 @@
         };
         [viewModels addObject:timerCloseViewModel];
     }
+
+    // 全局文字颜色设置
+    AWELongPressPanelBaseViewModel *globalTextColorViewModel = [[%c(AWELongPressPanelBaseViewModel) alloc] init];
+    globalTextColorViewModel.awemeModel = self.awemeModel;
+    globalTextColorViewModel.actionType = 680;
+    globalTextColorViewModel.duxIconName = @"ic_font_outlined_20";
+    globalTextColorViewModel.describeString = @"全局文字颜色";
+    globalTextColorViewModel.action = ^{  
+      AWELongPressPanelManager *panelManager = [%c(AWELongPressPanelManager) shareInstance];
+      [panelManager dismissWithAnimation:YES completion:nil];
+      
+      // 显示颜色选择器
+      DYYYColorPickerViewController *colorPickerVC = [[DYYYColorPickerViewController alloc] init];
+      colorPickerVC.colorHexString = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+      colorPickerVC.onColorSelected = ^(NSString *colorHex) {
+        [[NSUserDefaults standardUserDefaults] setObject:colorHex forKey:@"DYYYGlobalTextColor"];
+        [DYYYUtils showToast:@"全局文字颜色已更新"];
+        
+        // 立即应用颜色变化
+        UIView *keyWindow = [[UIApplication sharedApplication] keyWindow];
+        if (keyWindow) {
+            NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+            BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+            NSString *gradientScheme = enableGradientText ? globalTextColor : nil;
+            applyColorToAllSubviews(keyWindow, globalTextColor, gradientScheme);
+        }
+      };
+      
+      UIViewController *rootVC = [[UIApplication sharedApplication] keyWindow].rootViewController;
+      [rootVC presentViewController:colorPickerVC animated:YES completion:nil];
+    };
+    [viewModels addObject:globalTextColorViewModel];
+
+    // 启用渐变文字设置
+    AWELongPressPanelBaseViewModel *enableGradientTextViewModel = [[%c(AWELongPressPanelBaseViewModel) alloc] init];
+    enableGradientTextViewModel.awemeModel = self.awemeModel;
+    enableGradientTextViewModel.actionType = 681;
+    enableGradientTextViewModel.duxIconName = @"ic_gradient_outlined_20";
+    enableGradientTextViewModel.describeString = @"启用渐变文字";
+    enableGradientTextViewModel.action = ^{  
+      AWELongPressPanelManager *panelManager = [%c(AWELongPressPanelManager) shareInstance];
+      [panelManager dismissWithAnimation:YES completion:nil];
+      
+      // 切换启用状态
+      BOOL currentState = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+      BOOL newState = !currentState;
+      [[NSUserDefaults standardUserDefaults] setBool:newState forKey:@"DYYYEnableGradientText"];
+      [DYYYUtils showToast:newState ? @"已启用渐变文字" : @"已关闭渐变文字"];
+      
+      // 立即应用颜色变化
+      UIView *keyWindow = [[UIApplication sharedApplication] keyWindow];
+      if (keyWindow) {
+          NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+          BOOL enableGradientText = newState;
+          NSString *gradientScheme = enableGradientText ? globalTextColor : nil;
+          applyColorToAllSubviews(keyWindow, globalTextColor, gradientScheme);
+      }
+    };
+    [viewModels addObject:enableGradientTextViewModel];
 
     // 创建自定义组
     NSMutableArray *customGroups = [NSMutableArray array];
