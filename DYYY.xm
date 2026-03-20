@@ -1014,14 +1014,6 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 
 %end
 
-%hook UIView
-- (void)layoutSubviews {
-    %orig;
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
-}
-%end
-
 %hook UIViewController
 - (void)viewDidAppear:(BOOL)animated {
     %orig(animated);
@@ -6240,6 +6232,9 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
 
 - (void)layoutSubviews {
     %orig;
+
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
 
     if (DYYYGetBool(@"DYYYEnableFullScreen")) {
         if (self.frame.size.height == originalTabBarHeight && originalTabBarHeight > 0) {
