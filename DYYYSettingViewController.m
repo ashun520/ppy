@@ -2,6 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "DYYYConstants.h"
+#import "DYYYColorPickerViewController.h"
 
 typedef NS_ENUM(NSInteger, DYYYSettingItemType) { DYYYSettingItemTypeSwitch, DYYYSettingItemTypeTextField, DYYYSettingItemTypePicker };
 
@@ -769,7 +770,7 @@ typedef NS_ENUM(NSInteger, DYYYSettingItemType) { DYYYSettingItemTypeSwitch, DYY
     if ([colorScheme isEqualToString:@"#000000"]) return @"纯黑色";
     if ([colorScheme isEqualToString:@"rainbow"]) return @"彩虹渐变";
     if ([colorScheme isEqualToString:@"rainbow_rotating"]) return @"动态彩虹";
-    if (colorScheme.contains(@",")) return @"自定义渐变";
+    if ([colorScheme rangeOfString:@","].location != NSNotFound) return @"自定义渐变";
     return @"自定义";
 }
 
