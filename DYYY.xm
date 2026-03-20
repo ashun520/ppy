@@ -3006,14 +3006,14 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
     %orig;
     
     // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
+    applyGlobalTextColorToView((UIView *)self);
 }
 
 - (void)setCurrentContext:(id)currentContext {
     %orig(currentContext);
     
     // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
+    applyGlobalTextColorToView((UIView *)self);
 }
 
 %end
@@ -3040,14 +3040,14 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
     %orig;
     
     // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
+    applyGlobalTextColorToView((UIView *)self);
 }
 
 - (void)setModel:(id)model {
     %orig(model);
     
     // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
+    applyGlobalTextColorToView((UIView *)self);
 }
 
 %end
