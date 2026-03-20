@@ -2244,13 +2244,6 @@ static BOOL isGestureActive = NO;
     // DYYYApplyGlobalTextColorToLabel(self);
 }
 
-- (void)setAttributedText:(NSAttributedString *)attributedText {
-    %orig(attributedText);
-    
-    // 应用全局文字颜色到 attributedText（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToLabel(self);
-}
-
 - (void)awakeFromNib {
     %orig;
     
@@ -5564,13 +5557,6 @@ static NSHashTable *processedParentViews = nil;
     // DYYYApplyGlobalTextColorToTextField(self);
 }
 
-- (void)setAttributedText:(NSAttributedString *)attributedText {
-    %orig(attributedText);
-    
-    // 应用全局文字颜色到 attributedText（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToTextField(self);
-}
-
 - (void)willMoveToWindow:(UIWindow *)newWindow {
     %orig;
 
@@ -5594,13 +5580,6 @@ static NSHashTable *processedParentViews = nil;
     %orig(text);
     
     // 应用全局文字颜色（已禁用，导致闪退）
-    // DYYYApplyGlobalTextColorToTextView(self);
-}
-
-- (void)setAttributedText:(NSAttributedString *)attributedText {
-    %orig(attributedText);
-    
-    // 应用全局文字颜色到 attributedText（已禁用，导致闪退）
     // DYYYApplyGlobalTextColorToTextView(self);
 }
 
