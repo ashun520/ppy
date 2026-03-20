@@ -772,15 +772,6 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
       colorPickerVC.colorSelectedHandler = ^(NSString *colorScheme) {
         [[NSUserDefaults standardUserDefaults] setObject:colorScheme forKey:@"DYYYGlobalTextColor"];
         [DYYYUtils showToast:@"全局文字颜色已更新"];
-        
-        // 立即应用颜色变化
-        UIView *keyWindow = [[UIApplication sharedApplication] keyWindow];
-        if (keyWindow) {
-            NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-            BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
-            NSString *gradientScheme = enableGradientText ? globalTextColor : nil;
-            applyColorToAllSubviews(keyWindow, globalTextColor, gradientScheme);
-        }
       };
       
       UIViewController *rootVC = [[UIApplication sharedApplication] keyWindow].rootViewController;
@@ -803,15 +794,6 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
       BOOL newState = !currentState;
       [[NSUserDefaults standardUserDefaults] setBool:newState forKey:@"DYYYEnableGradientText"];
       [DYYYUtils showToast:newState ? @"已启用渐变文字" : @"已关闭渐变文字"];
-      
-      // 立即应用颜色变化
-      UIView *keyWindow = [[UIApplication sharedApplication] keyWindow];
-      if (keyWindow) {
-          NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-          BOOL enableGradientText = newState;
-          NSString *gradientScheme = enableGradientText ? globalTextColor : nil;
-          applyColorToAllSubviews(keyWindow, globalTextColor, gradientScheme);
-      }
     };
     [viewModels addObject:enableGradientTextViewModel];
 

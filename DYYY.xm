@@ -1001,11 +1001,6 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 - (void)makeKeyAndVisible {
     %orig;
 
-    // 应用全局文字颜色和渐变色文字效果
-    dispatch_async(dispatch_get_main_queue(), ^{  
-      applyGlobalTextColorToView(self);
-    });
-
     if (!isFloatSpeedButtonEnabled)
         return;
 
@@ -1027,8 +1022,6 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 - (void)viewDidLayoutSubviews {
     %orig;
     [self applyBlurEffectIfNeeded];
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
 }
 
 %new
@@ -3005,70 +2998,25 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 
 - (void)layoutSubviews {
     %orig;
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        applyGlobalTextColorToView((UIView *)self);
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] AWEIMReusableCommonCell layoutSubviews exception: %@", exception);
-    }
 }
 
 - (void)setCurrentContext:(id)currentContext {
     %orig(currentContext);
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        applyGlobalTextColorToView((UIView *)self);
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] AWEIMReusableCommonCell setCurrentContext exception: %@", exception);
-    }
 }
 
 %end
 
-// 为评论列表单元格添加颜色渲染
-%hook AWECommentModel
 
-- (void)setContent:(NSString *)content {
-    %orig(content);
-    
-    // 应用全局文字颜色和渐变色文字效果到评论内容
-    UIView *parentView = [[UIApplication sharedApplication] keyWindow];
-    if (parentView) {
-        applyGlobalTextColorToView(parentView);
-    }
-}
-
-%end
 
 // 为评论单元格添加颜色渲染
 %hook AWECommentCell
 
 - (void)layoutSubviews {
     %orig;
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        applyGlobalTextColorToView((UIView *)self);
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] AWECommentCell layoutSubviews exception: %@", exception);
-    }
 }
 
 - (void)setModel:(id)model {
     %orig(model);
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        applyGlobalTextColorToView((UIView *)self);
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] AWECommentCell setModel exception: %@", exception);
-    }
 }
 
 %end
@@ -3078,19 +3026,11 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 
 - (void)viewDidLayoutSubviews {
     %orig;
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        applyGlobalTextColorToView(self.view);
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] AWECommentInputViewController viewDidLayoutSubviews exception: %@", exception);
-    }
 }
 
 %end
 
-// 为所有UILabel添加颜色渲染和倍速显示
+// 为所有UILabel添加倍速显示
 %hook UILabel
 
 - (void)setText:(NSString *)text {
@@ -3115,116 +3055,11 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
     }
 
     %orig(text);
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
-        
-        if (globalTextColor && globalTextColor.length > 0) {
-            if (enableGradientText) {
-                [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
-            } else {
-                UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:self.bounds.size.width];
-                if (color) {
-                    self.textColor = color;
-                }
-            }
-        }
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] UILabel setText exception: %@", exception);
-    }
-}
-
-- (void)setAttributedText:(NSAttributedString *)attributedText {
-    %orig(attributedText);
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
-        
-        if (globalTextColor && globalTextColor.length > 0 && enableGradientText) {
-            [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
-        }
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] UILabel setAttributedText exception: %@", exception);
-    }
 }
 
 %end
 
-// 为所有UITextView添加颜色渲染
-%hook UITextView
 
-- (void)setText:(NSString *)text {
-    %orig(text);
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        if (globalTextColor && globalTextColor.length > 0) {
-            [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
-        }
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] UITextView setText exception: %@", exception);
-    }
-}
-
-- (void)setAttributedText:(NSAttributedString *)attributedText {
-    %orig(attributedText);
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        if (globalTextColor && globalTextColor.length > 0) {
-            [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
-        }
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] UITextView setAttributedText exception: %@", exception);
-    }
-}
-
-%end
-
-// 为所有UITextField添加颜色渲染
-%hook UITextField
-
-- (void)setText:(NSString *)text {
-    %orig(text);
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        if (globalTextColor && globalTextColor.length > 0) {
-            [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
-        }
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] UITextField setText exception: %@", exception);
-    }
-}
-
-- (void)setAttributedText:(NSAttributedString *)attributedText {
-    %orig(attributedText);
-    
-    @try {
-        // 应用全局文字颜色和渐变色文字效果
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        if (globalTextColor && globalTextColor.length > 0) {
-            [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
-        }
-    } @catch (NSException *exception) {
-        // 防止闪退
-        NSLog(@"[DYYY] UITextField setAttributedText exception: %@", exception);
-    }
-}
-
-%end
 
 // 隐藏合集和声明
 %hook AWEAntiAddictedNoticeBarView
@@ -5735,9 +5570,6 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
 
     BOOL appliedHeight = [self applyTabBarHeight];
     
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
-    
     if (appliedHeight)
         return;
 
@@ -5975,8 +5807,6 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
 
 - (void)layoutSubviews {
     %orig;
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
 }
 
 %end
@@ -6082,8 +5912,6 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
         return;
     }
     
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
 }
 %end
 
@@ -6240,16 +6068,10 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
             }
         }
     }
-    
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
 }
 
 - (void)viewDidLayoutSubviews {
     %orig;
-
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
 
     if (!DYYYGetBool(@"DYYYEnableCommentBlur"))
         return;
@@ -6332,9 +6154,6 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
 
 - (void)layoutSubviews {
     %orig;
-
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self);
 
     if (DYYYGetBool(@"DYYYEnableFullScreen")) {
         if (self.frame.size.height == originalTabBarHeight && originalTabBarHeight > 0) {
@@ -6963,14 +6782,10 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
     }
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{    isAppInTransition = NO;
     });
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     %orig;
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -6982,14 +6797,10 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
 
 - (void)viewDidLayoutSubviews {
     %orig;
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
 }
 
 - (void)viewWillLayoutSubviews {
     %orig;
-    // 应用全局文字颜色和渐变色文字效果
-    applyGlobalTextColorToView(self.view);
 }
 %end
 
