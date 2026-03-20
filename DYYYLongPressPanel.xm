@@ -768,9 +768,9 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
       
       // 显示颜色选择器
       DYYYColorPickerViewController *colorPickerVC = [[DYYYColorPickerViewController alloc] init];
-      colorPickerVC.colorHexString = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-      colorPickerVC.onColorSelected = ^(NSString *colorHex) {
-        [[NSUserDefaults standardUserDefaults] setObject:colorHex forKey:@"DYYYGlobalTextColor"];
+      colorPickerVC.selectedColorScheme = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+      colorPickerVC.colorSelectedHandler = ^(NSString *colorScheme) {
+        [[NSUserDefaults standardUserDefaults] setObject:colorScheme forKey:@"DYYYGlobalTextColor"];
         [DYYYUtils showToast:@"全局文字颜色已更新"];
         
         // 立即应用颜色变化
