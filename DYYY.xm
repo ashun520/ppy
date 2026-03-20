@@ -51,20 +51,17 @@ static void applyGlobalTextColorToView(UIView *view) {
     NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
     BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
     
-    // 收集所有设置的渐变色
-    NSMutableArray *gradientColors = [NSMutableArray array];
-    for (int i = 1; i <= 5; i++) {
-        NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
-        NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
-        if (colorValue && colorValue.length > 0) {
-            [gradientColors addObject:colorValue];
-        }
-    }
-    
-    // 构建渐变方案字符串
+    // 获取第一个渐变颜色设置
     NSString *gradientScheme = nil;
-    if (enableGradientText && gradientColors.count >= 2) {
-        gradientScheme = [gradientColors componentsJoinedByString:@","];
+    if (enableGradientText) {
+        for (int i = 1; i <= 5; i++) {
+            NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
+            NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
+            if (colorValue && colorValue.length > 0) {
+                gradientScheme = colorValue;
+                break;
+            }
+        }
     }
     
     // 遍历所有子视图并应用颜色
@@ -1018,8 +1015,26 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 %end
 
 %hook UIViewController
+- (void)viewWillAppear:(BOOL)animated {
+    %orig(animated);
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
+}
+
 - (void)viewDidAppear:(BOOL)animated {
     %orig(animated);
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
+}
+
+- (void)viewDidLayoutSubviews {
+    %orig;
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self.view);
+}
+
+- (void)viewWillLayoutSubviews {
+    %orig;
     // 应用全局文字颜色和渐变色文字效果
     applyGlobalTextColorToView(self.view);
 }
