@@ -42,44 +42,76 @@ static NSInteger dyyyGlobalTransparencyMutationDepth = 0;
 
 // 全局文字颜色和渐变色文字效果
 static void applyGlobalTextColorToView(UIView *view) {
+    if (!view) return;
+    
     // 检查是否启用了全局文字颜色
     NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0) {
-        UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
-        if (color) {
-            [DYYYUtils applyTextColorRecursively:color inView:view shouldExcludeViewBlock:^BOOL(UIView *subview) {
-                // 排除某些不需要改变颜色的视图
-                return NO;
-            }];
+    BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+    
+    // 收集所有设置的渐变色
+    NSMutableArray *gradientColors = [NSMutableArray array];
+    for (int i = 1; i <= 5; i++) {
+        NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
+        NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
+        if (colorValue && colorValue.length > 0) {
+            [gradientColors addObject:colorValue];
         }
     }
     
-    // 检查是否启用了渐变色文字
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"]) {
-        NSMutableArray *gradientColors = [NSMutableArray array];
-        
-        // 收集所有设置的渐变色
-        for (int i = 1; i <= 5; i++) {
-            NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
-            NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
-            if (colorValue && colorValue.length > 0) {
-                [gradientColors addObject:colorValue];
-            }
-        }
-        
-        // 至少需要两种颜色才能创建渐变
-        if (gradientColors.count >= 2) {
-            // 构建渐变方案字符串
-            NSString *gradientScheme = [gradientColors componentsJoinedByString:@","];
-            
-            // 遍历所有UILabel并应用渐变色
-            NSArray *labels = [DYYYUtils findAllSubviewsOfClass:[UILabel class] inContainer:view];
-            for (UILabel *label in labels) {
-                if (label.text && label.text.length > 0) {
-                    [DYYYUtils applyColorSettingsToLabel:label colorHexString:gradientScheme];
+    // 构建渐变方案字符串
+    NSString *gradientScheme = nil;
+    if (enableGradientText && gradientColors.count >= 2) {
+        gradientScheme = [gradientColors componentsJoinedByString:@","];
+    }
+    
+    // 遍历所有子视图并应用颜色
+    applyColorToAllSubviews(view, globalTextColor, gradientScheme);
+}
+
+// 递归应用颜色到所有子视图
+static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSString *gradientScheme) {
+    if (!view) return;
+    
+    // 应用到UILabel
+    if ([view isKindOfClass:[UILabel class]]) {
+        UILabel *label = (UILabel *)view;
+        if (label.text && label.text.length > 0) {
+            if (gradientScheme) {
+                [DYYYUtils applyColorSettingsToLabel:label colorHexString:gradientScheme];
+            } else if (globalTextColor && globalTextColor.length > 0) {
+                UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
+                if (color) {
+                    label.textColor = color;
                 }
             }
         }
+    }
+    
+    // 应用到UITextField
+    if ([view isKindOfClass:[UITextField class]]) {
+        UITextField *textField = (UITextField *)view;
+        if (globalTextColor && globalTextColor.length > 0) {
+            UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
+            if (color) {
+                textField.textColor = color;
+            }
+        }
+    }
+    
+    // 应用到UITextView
+    if ([view isKindOfClass:[UITextView class]]) {
+        UITextView *textView = (UITextView *)view;
+        if (globalTextColor && globalTextColor.length > 0) {
+            UIColor *color = [DYYYUtils colorFromSchemeHexString:globalTextColor targetWidth:view.bounds.size.width];
+            if (color) {
+                textView.textColor = color;
+            }
+        }
+    }
+    
+    // 递归处理子视图
+    for (UIView *subview in view.subviews) {
+        applyColorToAllSubviews(subview, globalTextColor, gradientScheme);
     }
 }
 
@@ -980,6 +1012,14 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 }
 %end
 
+%end
+
+%hook UIView
+- (void)layoutSubviews {
+    %orig;
+    // 应用全局文字颜色和渐变色文字效果
+    applyGlobalTextColorToView(self);
+}
 %end
 
 %hook UIViewController
