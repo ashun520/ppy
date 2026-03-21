@@ -8059,3 +8059,79 @@ static void findTargetViewInView(UIView *view) {
                                                     }];
     }
 }
+
+// ========== 全局文字颜色增强 - 评论区和聊天区 ==========
+
+// 评论区列表控制器
+%hook AWEBaseListViewController
+- (void)viewDidLayoutSubviews {
+    %orig;
+    
+    // 应用全局文字颜色到评论区
+    dispatch_async(dispatch_get_main_queue(), ^{
+        applyGlobalTextColorToView(self.view);
+    });
+}
+%end
+
+// 评论区输入容器
+%hook CommentInputContainerView
+- (void)layoutSubviews {
+    %orig;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        applyGlobalTextColorToView(self);
+    });
+}
+%end
+
+// IM 消息输入栏
+%hook AWEMsgInputToolBarView
+- (void)layoutSubviews {
+    %orig;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        applyGlobalTextColorToView(self);
+    });
+}
+%end
+
+// 聊天消息 cell
+%hook AWEIMMessageCell
+- (void)layoutSubviews {
+    %orig;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        applyGlobalTextColorToView(self);
+    });
+}
+%end
+
+// 视频评论区 cell
+%hook _TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell
+- (void)layoutSubviews {
+    %orig;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        applyGlobalTextColorToView(self);
+    });
+}
+%end
+
+// 通用 UILabel 设置文字时自动应用颜色
+%hook UILabel
+- (void)setText:(NSString *)text {
+    %orig(text);
+    
+    // 检查是否设置了全局文字颜色
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0 && text && text.length > 0) {
+        // 延迟应用，确保布局完成
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if ([self isKindOfClass:[UILabel class]]) {
+                [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
+            }
+        });
+    }
+}
+%end
