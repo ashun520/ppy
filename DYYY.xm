@@ -3035,7 +3035,7 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 
 %end
 
-// 为所有UILabel添加倍速显示
+// 为所有UILabel添加倍速显示和全局文字颜色
 %hook UILabel
 
 - (void)setText:(NSString *)text {
@@ -3061,17 +3061,95 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 
     %orig(text);
     
-    // 应用全局文字颜色
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0 && text && text.length > 0) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if ([self isKindOfClass:[UILabel class]]) {
+    @try {
+        // 防止无限循环
+        NSNumber *isApplying = objc_getAssociatedObject(self, &kDYYYIsApplyingColorKey);
+        if (isApplying && [isApplying boolValue]) {
+            return;
+        }
+        
+        // 应用全局文字颜色
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+        
+        NSString *gradientScheme = nil;
+        if (enableGradientText) {
+            for (int i = 1; i <= 5; i++) {
+                NSString *enableKey = [NSString stringWithFormat:@"DYYYEnableGradientTextColor%d", i];
+                BOOL enableGradient = [[NSUserDefaults standardUserDefaults] boolForKey:enableKey];
+                if (enableGradient) {
+                    NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
+                    NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
+                    if (colorValue && colorValue.length > 0) {
+                        gradientScheme = colorValue;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if ((gradientScheme && gradientScheme.length > 0) || (globalTextColor && globalTextColor.length > 0)) {
+            objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            
+            if (gradientScheme && gradientScheme.length > 0) {
+                [DYYYUtils applyColorSettingsToLabel:self colorHexString:gradientScheme];
+            } else if (globalTextColor && globalTextColor.length > 0) {
                 [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
             }
-        });
+            
+            objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 }
-
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    %orig(attributedText);
+    
+    @try {
+        // 防止无限循环
+        NSNumber *isApplying = objc_getAssociatedObject(self, &kDYYYIsApplyingColorKey);
+        if (isApplying && [isApplying boolValue]) {
+            return;
+        }
+        
+        // 应用全局文字颜色
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
+        
+        NSString *gradientScheme = nil;
+        if (enableGradientText) {
+            for (int i = 1; i <= 5; i++) {
+                NSString *enableKey = [NSString stringWithFormat:@"DYYYEnableGradientTextColor%d", i];
+                BOOL enableGradient = [[NSUserDefaults standardUserDefaults] boolForKey:enableKey];
+                if (enableGradient) {
+                    NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
+                    NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
+                    if (colorValue && colorValue.length > 0) {
+                        gradientScheme = colorValue;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if ((gradientScheme && gradientScheme.length > 0) || (globalTextColor && globalTextColor.length > 0)) {
+            objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            
+            if (gradientScheme && gradientScheme.length > 0) {
+                [DYYYUtils applyColorSettingsToLabel:self colorHexString:gradientScheme];
+            } else if (globalTextColor && globalTextColor.length > 0) {
+                [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
+            }
+            
+            objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+    } @catch (NSException *exception) {
+        // 防止闪退
+        objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+}
 %end
 
 %hook UITextView
@@ -3079,15 +3157,25 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 - (void)setText:(NSString *)text {
     %orig(text);
     
-    // 应用全局文字颜色
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0 && text && text.length > 0) {
-        dispatch_async(dispatch_get_main_queue(), ^{ 
+    @try {
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        if (globalTextColor && globalTextColor.length > 0) {
             [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
-        });
+        }
+    } @catch (NSException *exception) {
     }
 }
-
+- (void)setAttributedText:(NSAttributedString *)attributedText {
+    %orig(attributedText);
+    
+    @try {
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        if (globalTextColor && globalTextColor.length > 0) {
+            [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
+        }
+    } @catch (NSException *exception) {
+    }
+}
 %end
 
 %hook UITextField
@@ -3095,15 +3183,14 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 - (void)setText:(NSString *)text {
     %orig(text);
     
-    // 应用全局文字颜色
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0 && text && text.length > 0) {
-        dispatch_async(dispatch_get_main_queue(), ^{ 
+    @try {
+        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+        if (globalTextColor && globalTextColor.length > 0) {
             [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
-        });
+        }
+    } @catch (NSException *exception) {
     }
 }
-
 %end
 
 // 隐藏合集和声明
@@ -8043,144 +8130,8 @@ static void findTargetViewInView(UIView *view) {
 }
 %end
 
-// 通用 UILabel hook - 这是最关键的，确保所有 UILabel 都能被着色
+// 防止无限循环的标志
 static char kDYYYIsApplyingColorKey;
-
-%hook UILabel
-- (void)setText:(NSString *)text {
-    %orig(text);
-    
-    @try {
-        // 防止无限循环
-        NSNumber *isApplying = objc_getAssociatedObject(self, &kDYYYIsApplyingColorKey);
-        if (isApplying && [isApplying boolValue]) {
-            return;
-        }
-        
-        // 应用全局文字颜色
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
-        
-        NSString *gradientScheme = nil;
-        if (enableGradientText) {
-            for (int i = 1; i <= 5; i++) {
-                NSString *enableKey = [NSString stringWithFormat:@"DYYYEnableGradientTextColor%d", i];
-                BOOL enableGradient = [[NSUserDefaults standardUserDefaults] boolForKey:enableKey];
-                if (enableGradient) {
-                    NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
-                    NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
-                    if (colorValue && colorValue.length > 0) {
-                        gradientScheme = colorValue;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        if ((gradientScheme && gradientScheme.length > 0) || (globalTextColor && globalTextColor.length > 0)) {
-            objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-            
-            if (gradientScheme && gradientScheme.length > 0) {
-                [DYYYUtils applyColorSettingsToLabel:self colorHexString:gradientScheme];
-            } else if (globalTextColor && globalTextColor.length > 0) {
-                [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
-            }
-            
-            objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        }
-    } @catch (NSException *exception) {
-        // 防止闪退
-        objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-}
-- (void)setAttributedText:(NSAttributedString *)attributedText {
-    %orig(attributedText);
-    
-    @try {
-        // 防止无限循环
-        NSNumber *isApplying = objc_getAssociatedObject(self, &kDYYYIsApplyingColorKey);
-        if (isApplying && [isApplying boolValue]) {
-            return;
-        }
-        
-        // 应用全局文字颜色
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        BOOL enableGradientText = [[NSUserDefaults standardUserDefaults] boolForKey:@"DYYYEnableGradientText"];
-        
-        NSString *gradientScheme = nil;
-        if (enableGradientText) {
-            for (int i = 1; i <= 5; i++) {
-                NSString *enableKey = [NSString stringWithFormat:@"DYYYEnableGradientTextColor%d", i];
-                BOOL enableGradient = [[NSUserDefaults standardUserDefaults] boolForKey:enableKey];
-                if (enableGradient) {
-                    NSString *colorKey = [NSString stringWithFormat:@"DYYYGradientTextColor%d", i];
-                    NSString *colorValue = [[NSUserDefaults standardUserDefaults] objectForKey:colorKey];
-                    if (colorValue && colorValue.length > 0) {
-                        gradientScheme = colorValue;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        if ((gradientScheme && gradientScheme.length > 0) || (globalTextColor && globalTextColor.length > 0)) {
-            objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-            
-            if (gradientScheme && gradientScheme.length > 0) {
-                [DYYYUtils applyColorSettingsToLabel:self colorHexString:gradientScheme];
-            } else if (globalTextColor && globalTextColor.length > 0) {
-                [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
-            }
-            
-            objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        }
-    } @catch (NSException *exception) {
-        // 防止闪退
-        objc_setAssociatedObject(self, &kDYYYIsApplyingColorKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-}
-%end
-
-// UITextField hook
-%hook UITextField
-- (void)setText:(NSString *)text {
-    %orig(text);
-    
-    @try {
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        if (globalTextColor && globalTextColor.length > 0) {
-            [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
-        }
-    } @catch (NSException *exception) {
-    }
-}
-%end
-
-// UITextView hook
-%hook UITextView
-- (void)setText:(NSString *)text {
-    %orig(text);
-    
-    @try {
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        if (globalTextColor && globalTextColor.length > 0) {
-            [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
-        }
-    } @catch (NSException *exception) {
-    }
-}
-- (void)setAttributedText:(NSAttributedString *)attributedText {
-    %orig(attributedText);
-    
-    @try {
-        NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-        if (globalTextColor && globalTextColor.length > 0) {
-            [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
-        }
-    } @catch (NSException *exception) {
-    }
-}
-%end
 
 
 
