@@ -8043,61 +8043,78 @@ static void findTargetViewInView(UIView *view) {
     }
     if (DYYYGetBool(@"DYYYUserAgreementAccepted")) {
         static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
+        dispatch_once(&onceToken, ^{ 
+          // 初始化 CommentInputContainerView
           Class wSwiftImpl = objc_getClass("AWECommentInputViewSwiftImpl.CommentInputContainerView");
-          %init(CommentInputContainerView = wSwiftImpl);
+          if (wSwiftImpl) {
+              %init(CommentInputContainerView = wSwiftImpl);
+          }
+          
+          // 初始化全局文字颜色相关的类
+          Class msgInputToolBarViewClass = objc_getClass("AWEMsgInputToolBarView");
+          if (msgInputToolBarViewClass) {
+              %init(AWEMsgInputToolBarView = msgInputToolBarViewClass);
+          }
+          
+          Class imMessageCellClass = objc_getClass("AWEIMMessageCell");
+          if (imMessageCellClass) {
+              %init(AWEIMMessageCell = imMessageCellClass);
+          }
+          
+          Class commentPanelCellClass = objc_getClass("_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell");
+          if (commentPanelCellClass) {
+              %init(_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell = commentPanelCellClass);
+          }
+          
+          // 初始化 AutoPlay 组
+          BOOL isAutoPlayEnabled = DYYYGetBool(@"DYYYEnableAutoPlay");
+          if (isAutoPlayEnabled) {
+              %init(AutoPlay);
+          }
+          
+          // 初始化 EnableStickerSaveMenu 组
+          if (DYYYGetBool(@"DYYYForceDownloadEmotion")) {
+              %init(EnableStickerSaveMenu);
+          }
+          
+          // 初始化红包激励挂件容器视图类组
+          Class incentivePendantClass = objc_getClass("AWEIncentiveSwiftImplDOUYINLite.IncentivePendantContainerView");
+          if (incentivePendantClass) {
+              %init(IncentivePendantGroup, AWEIncentiveSwiftImplDOUYINLite_IncentivePendantContainerView = incentivePendantClass);
+          }
+          
+          Class imageContentClass = objc_getClass("BDMultiContentContainer.ImageContentView");
+          if (imageContentClass) {
+              %init(BDMultiContentImageViewGroup, BDMultiContentContainer_ImageContentView = imageContentClass);
+          }
+
+          // 动态获取 Swift 类并初始化对应的组
+          Class commentHeaderGeneralClass = objc_getClass("AWECommentPanelHeaderSwiftImpl.CommentHeaderGeneralView");
+          if (commentHeaderGeneralClass) {
+              %init(CommentHeaderGeneralGroup, AWECommentPanelHeaderSwiftImpl_CommentHeaderGeneralView = commentHeaderGeneralClass);
+          }
+
+          Class commentHeaderGoodsClass = objc_getClass("AWECommentPanelHeaderSwiftImpl.CommentHeaderGoodsView");
+          if (commentHeaderGoodsClass) {
+              %init(CommentHeaderGoodsGroup, AWECommentPanelHeaderSwiftImpl_CommentHeaderGoodsView = commentHeaderGoodsClass);
+          }
+
+          Class commentHeaderTemplateClass = objc_getClass("AWECommentPanelHeaderSwiftImpl.CommentHeaderTemplateAnchorView");
+          if (commentHeaderTemplateClass) {
+              %init(CommentHeaderTemplateGroup, AWECommentPanelHeaderSwiftImpl_CommentHeaderTemplateAnchorView = commentHeaderTemplateClass);
+          }
+
+          Class tipsVCClass = objc_getClass("AWECommentPanelListSwiftImpl.CommentBottomTipsContainerViewController");
+          if (tipsVCClass) {
+              %init(CommentBottomTipsVCGroup, AWECommentPanelListSwiftImpl_CommentBottomTipsContainerViewController = tipsVCClass);
+          }
         });
         
-        // 初始化全局文字颜色相关的类
-        Class msgInputToolBarViewClass = objc_getClass("AWEMsgInputToolBarView");
-        %init(AWEMsgInputToolBarView = msgInputToolBarViewClass);
-        
-        Class imMessageCellClass = objc_getClass("AWEIMMessageCell");
-        %init(AWEIMMessageCell = imMessageCellClass);
-        
-        Class commentPanelCellClass = objc_getClass("_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell");
-        %init(_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell = commentPanelCellClass);
-        
-        BOOL isAutoPlayEnabled = DYYYGetBool(@"DYYYEnableAutoPlay");
-        if (isAutoPlayEnabled) {
-            %init(AutoPlay);
-        }
-        if (DYYYGetBool(@"DYYYForceDownloadEmotion")) {
-            %init(EnableStickerSaveMenu);
-        }
+
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         isFloatSpeedButtonEnabled = [defaults boolForKey:@"DYYYEnableFloatSpeedButton"];
 
-        // 初始化红包激励挂件容器视图类组
-        Class incentivePendantClass = objc_getClass("AWEIncentiveSwiftImplDOUYINLite.IncentivePendantContainerView");
-        if (incentivePendantClass) {
-            %init(IncentivePendantGroup, AWEIncentiveSwiftImplDOUYINLite_IncentivePendantContainerView = incentivePendantClass);
-        }
-        Class imageContentClass = objc_getClass("BDMultiContentContainer.ImageContentView");
-        if (imageContentClass) {
-            %init(BDMultiContentImageViewGroup, BDMultiContentContainer_ImageContentView = imageContentClass);
-        }
 
-        // 动态获取 Swift 类并初始化对应的组
-        Class commentHeaderGeneralClass = objc_getClass("AWECommentPanelHeaderSwiftImpl.CommentHeaderGeneralView");
-        if (commentHeaderGeneralClass) {
-            %init(CommentHeaderGeneralGroup, AWECommentPanelHeaderSwiftImpl_CommentHeaderGeneralView = commentHeaderGeneralClass);
-        }
-
-        Class commentHeaderGoodsClass = objc_getClass("AWECommentPanelHeaderSwiftImpl.CommentHeaderGoodsView");
-        if (commentHeaderGoodsClass) {
-            %init(CommentHeaderGoodsGroup, AWECommentPanelHeaderSwiftImpl_CommentHeaderGoodsView = commentHeaderGoodsClass);
-        }
-
-        Class commentHeaderTemplateClass = objc_getClass("AWECommentPanelHeaderSwiftImpl.CommentHeaderTemplateAnchorView");
-        if (commentHeaderTemplateClass) {
-            %init(CommentHeaderTemplateGroup, AWECommentPanelHeaderSwiftImpl_CommentHeaderTemplateAnchorView = commentHeaderTemplateClass);
-        }
-
-        Class tipsVCClass = objc_getClass("AWECommentPanelListSwiftImpl.CommentBottomTipsContainerViewController");
-        if (tipsVCClass) {
-            %init(CommentBottomTipsVCGroup, AWECommentPanelListSwiftImpl_CommentBottomTipsContainerViewController = tipsVCClass);
-        }
 
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
         DYYYRemoveKeyboardObserver();
