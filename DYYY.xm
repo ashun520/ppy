@@ -8016,17 +8016,18 @@ static void findTargetViewInView(UIView *view) {
         dispatch_once(&onceToken, ^{
           Class wSwiftImpl = objc_getClass("AWECommentInputViewSwiftImpl.CommentInputContainerView");
           %init(CommentInputContainerView = wSwiftImpl);
-          
-          // 初始化全局文字颜色相关的类
-          Class msgInputToolBarViewClass = objc_getClass("AWEMsgInputToolBarView");
-          %init(AWEMsgInputToolBarView = msgInputToolBarViewClass);
-          
-          Class imMessageCellClass = objc_getClass("AWEIMMessageCell");
-          %init(AWEIMMessageCell = imMessageCellClass);
-          
-          Class commentPanelCellClass = objc_getClass("_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell");
-          %init(_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell = commentPanelCellClass);
         });
+        
+        // 初始化全局文字颜色相关的类
+        Class msgInputToolBarViewClass = objc_getClass("AWEMsgInputToolBarView");
+        %init(AWEMsgInputToolBarView = msgInputToolBarViewClass);
+        
+        Class imMessageCellClass = objc_getClass("AWEIMMessageCell");
+        %init(AWEIMMessageCell = imMessageCellClass);
+        
+        Class commentPanelCellClass = objc_getClass("_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell");
+        %init(_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell = commentPanelCellClass);
+        
         BOOL isAutoPlayEnabled = DYYYGetBool(@"DYYYEnableAutoPlay");
         if (isAutoPlayEnabled) {
             %init(AutoPlay);
