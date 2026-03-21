@@ -8041,44 +8041,7 @@ static void findTargetViewInView(UIView *view) {
 }
 %end
 
-// CommentInputContainerView
-%hook CommentInputContainerView
 
-- (void)layoutSubviews {
-    %orig;
-    
-    UIViewController *parentVC = nil;
-    if ([self respondsToSelector:@selector(viewController)]) {
-        id viewController = [self performSelector:@selector(viewController)];
-        if ([viewController respondsToSelector:@selector(parentViewController)]) {
-            parentVC = [viewController parentViewController];
-        }
-    }
-
-    if (parentVC && ([parentVC isKindOfClass:%c(AWEAwemeDetailTableViewController)] || [parentVC isKindOfClass:%c(AWEAwemeDetailCellViewController)])) {
-        static char kDYCommentHideCacheKey;
-        UIView *target = objc_getAssociatedObject(self, &kDYCommentHideCacheKey);
-        if (!target) {
-            for (UIView *subview in [self subviews]) {
-                if ([subview class] == [UIView class]) {
-                    target = subview;
-                    objc_setAssociatedObject(self, &kDYCommentHideCacheKey, target, OBJC_ASSOCIATION_ASSIGN);
-                    break;
-                }
-            }
-        }
-        if (target) {
-            target.hidden = ([(UIView *)self frame].size.height == gCurrentTabBarHeight);
-        }
-    }
-    
-    // 应用全局文字颜色
-    dispatch_async(dispatch_get_main_queue(), ^{ 
-        applyGlobalTextColorToView((UIView *)self);
-    });
-}
-
-%end
 
 %ctor {
     // 初始化全局文字颜色缓存（已禁用，导致闪退）
