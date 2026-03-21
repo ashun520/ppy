@@ -8009,7 +8009,7 @@ static void findTargetViewInView(UIView *view) {
 }
 
 // IM 消息输入栏
-%hookf AWEMsgInputToolBarView
+%hook AWEMsgInputToolBarView
 - (void)layoutSubviews {
     %orig;
     
@@ -8020,7 +8020,7 @@ static void findTargetViewInView(UIView *view) {
 %end
 
 // 聊天消息 cell
-%hookf AWEIMMessageCell
+%hook AWEIMMessageCell
 - (void)layoutSubviews {
     %orig;
     
@@ -8031,7 +8031,7 @@ static void findTargetViewInView(UIView *view) {
 %end
 
 // 视频评论区 cell
-%hookf _TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell
+%hook _TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell
 - (void)layoutSubviews {
     %orig;
     
@@ -8120,22 +8120,6 @@ static void findTargetViewInView(UIView *view) {
           Class wSwiftImpl = objc_getClass("AWECommentInputViewSwiftImpl.CommentInputContainerView");
           if (wSwiftImpl) {
               %init(CommentInputContainerView = wSwiftImpl);
-          }
-          
-          // 初始化全局文字颜色相关的类
-          Class msgInputToolBarViewClass = objc_getClass("AWEMsgInputToolBarView");
-          if (msgInputToolBarViewClass) {
-              %init(AWEMsgInputToolBarView = msgInputToolBarViewClass);
-          }
-          
-          Class imMessageCellClass = objc_getClass("AWEIMMessageCell");
-          if (imMessageCellClass) {
-              %init(AWEIMMessageCell = imMessageCellClass);
-          }
-          
-          Class commentPanelCellClass = objc_getClass("_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell");
-          if (commentPanelCellClass) {
-              %init(_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell = commentPanelCellClass);
           }
           
           // 初始化 AutoPlay 组
