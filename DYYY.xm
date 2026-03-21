@@ -1022,6 +1022,11 @@ static BOOL DYYYShouldHandleSpeedFeatures(void) {
 - (void)viewDidLayoutSubviews {
     %orig;
     [self applyBlurEffectIfNeeded];
+    
+    // 应用全局文字颜色到评论区
+    dispatch_async(dispatch_get_main_queue(), ^{
+        applyGlobalTextColorToView(self.view);
+    });
 }
 
 %new
@@ -7647,6 +7652,7 @@ static Class TagViewClass = nil;
 
 - (void)layoutSubviews {
     %orig;
+    
     UIViewController *parentVC = nil;
     if ([self respondsToSelector:@selector(viewController)]) {
         id viewController = [self performSelector:@selector(viewController)];
@@ -7671,6 +7677,11 @@ static Class TagViewClass = nil;
             target.hidden = ([(UIView *)self frame].size.height == gCurrentTabBarHeight);
         }
     }
+    
+    // 应用全局文字颜色
+    dispatch_async(dispatch_get_main_queue(), ^{
+        applyGlobalTextColorToView((UIView *)self);
+    });
 }
 
 %end
@@ -8069,31 +8080,6 @@ static void findTargetViewInView(UIView *view) {
                                                     }];
     }
 }
-
-// ========== 全局文字颜色增强 - 评论区和聊天区 ==========
-
-// 评论区列表控制器
-%hook AWEBaseListViewController
-- (void)viewDidLayoutSubviews {
-    %orig;
-    
-    // 应用全局文字颜色到评论区
-    dispatch_async(dispatch_get_main_queue(), ^{
-        applyGlobalTextColorToView(self.view);
-    });
-}
-%end
-
-// 评论区输入容器
-%hook CommentInputContainerView
-- (void)layoutSubviews {
-    %orig;
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        applyGlobalTextColorToView((UIView *)self);
-    });
-}
-%end
 
 // IM 消息输入栏
 %hook AWEMsgInputToolBarView
