@@ -3074,7 +3074,37 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
 
 %end
 
+%hook UITextView
 
+- (void)setText:(NSString *)text {
+    %orig(text);
+    
+    // 应用全局文字颜色
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0 && text && text.length > 0) {
+        dispatch_async(dispatch_get_main_queue(), ^{ 
+            [DYYYUtils applyColorSettingsToTextView:self colorHexString:globalTextColor];
+        });
+    }
+}
+
+%end
+
+%hook UITextField
+
+- (void)setText:(NSString *)text {
+    %orig(text);
+    
+    // 应用全局文字颜色
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0 && text && text.length > 0) {
+        dispatch_async(dispatch_get_main_queue(), ^{ 
+            [DYYYUtils applyColorSettingsToTextField:self colorHexString:globalTextColor];
+        });
+    }
+}
+
+%end
 
 // 隐藏合集和声明
 %hook AWEAntiAddictedNoticeBarView
