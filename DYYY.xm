@@ -8047,23 +8047,23 @@ static void findTargetViewInView(UIView *view) {
           // 初始化 CommentInputContainerView
           Class wSwiftImpl = objc_getClass("AWECommentInputViewSwiftImpl.CommentInputContainerView");
           if (wSwiftImpl) {
-              %init(CommentInputContainerView = wSwiftImpl);
+              %init(CommentInputContainerViewGroup, CommentInputContainerView = wSwiftImpl);
           }
           
           // 初始化全局文字颜色相关的类
           Class msgInputToolBarViewClass = objc_getClass("AWEMsgInputToolBarView");
           if (msgInputToolBarViewClass) {
-              %init(AWEMsgInputToolBarView = msgInputToolBarViewClass);
+              %init(AWEMsgInputToolBarViewGroup, AWEMsgInputToolBarView = msgInputToolBarViewClass);
           }
           
           Class imMessageCellClass = objc_getClass("AWEIMMessageCell");
           if (imMessageCellClass) {
-              %init(AWEIMMessageCell = imMessageCellClass);
+              %init(AWEIMMessageCellGroup, AWEIMMessageCell = imMessageCellClass);
           }
           
           Class commentPanelCellClass = objc_getClass("_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell");
           if (commentPanelCellClass) {
-              %init(_TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell = commentPanelCellClass);
+              %init(CommentPanelCellGroup, _TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell = commentPanelCellClass);
           }
           
           // 初始化 AutoPlay 组
@@ -8139,35 +8139,82 @@ static void findTargetViewInView(UIView *view) {
     }
 }
 
+// 为每个hook创建单独的group
+%group CommentInputContainerViewGroup
+%hook CommentInputContainerView
+
+- (void)layoutSubviews {
+    %orig;
+    
+    UIViewController *parentVC = nil;
+    if ([self respondsToSelector:@selector(viewController)]) {
+        id viewController = [self performSelector:@selector(viewController)];
+        if ([viewController respondsToSelector:@selector(parentViewController)]) {
+            parentVC = [viewController parentViewController];
+        }
+    }
+
+    if (parentVC && ([parentVC isKindOfClass:%c(AWEAwemeDetailTableViewController)] || [parentVC isKindOfClass:%c(AWEAwemeDetailCellViewController)])) {
+        static char kDYCommentHideCacheKey;
+        UIView *target = objc_getAssociatedObject(self, &kDYCommentHideCacheKey);
+        if (!target) {
+            for (UIView *subview in [self subviews]) {
+                if ([subview class] == [UIView class]) {
+                    target = subview;
+                    objc_setAssociatedObject(self, &kDYCommentHideCacheKey, target, OBJC_ASSOCIATION_ASSIGN);
+                    break;
+                }
+            }
+        }
+        if (target) {
+            target.hidden = ([(UIView *)self frame].size.height == gCurrentTabBarHeight);
+        }
+    }
+    
+    // 应用全局文字颜色
+    dispatch_async(dispatch_get_main_queue(), ^{ 
+        applyGlobalTextColorToView((UIView *)self);
+    });
+}
+
+%end
+%end
+
+%group AWEMsgInputToolBarViewGroup
 // IM 消息输入栏
 %hookf AWEMsgInputToolBarView
 - (void)layoutSubviews {
     %orig;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{ 
         applyGlobalTextColorToView((UIView *)self);
     });
 }
 %end
+%end
 
+%group AWEIMMessageCellGroup
 // 聊天消息 cell
 %hookf AWEIMMessageCell
 - (void)layoutSubviews {
     %orig;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{ 
         applyGlobalTextColorToView((UIView *)self);
     });
 }
 %end
+%end
 
+%group CommentPanelCellGroup
 // 视频评论区 cell
 %hookf _TtC33AWECommentPanelListSwiftImpl29CommentPanelListCollectionViewCell
 - (void)layoutSubviews {
     %orig;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{ 
         applyGlobalTextColorToView((UIView *)self);
     });
 }
+%end
 %end
