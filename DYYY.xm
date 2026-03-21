@@ -110,19 +110,6 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
             }
         }
         
-        // 应用到 UIButton
-        if ([view isKindOfClass:[UIButton class]]) {
-            UIButton *button = (UIButton *)view;
-            UILabel *buttonLabel = [button valueForKey:@"titleLabel"];
-            if (buttonLabel && buttonLabel.text && buttonLabel.text.length > 0) {
-                if (gradientScheme && gradientScheme.length > 0) {
-                    [DYYYUtils applyColorSettingsToLabel:buttonLabel colorHexString:gradientScheme];
-                } else if (globalTextColor && globalTextColor.length > 0) {
-                    [DYYYUtils applyColorSettingsToLabel:buttonLabel colorHexString:globalTextColor];
-                }
-            }
-        }
-        
         // 递归处理子视图
         for (UIView *subview in view.subviews) {
             applyColorToAllSubviews(subview, globalTextColor, gradientScheme);
@@ -5825,7 +5812,15 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
     NSString *bottomShopTitle = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYBottomShopTitle"];
     if (bottomShopTitle && bottomShopTitle.length > 0) {
         if ([self.accessibilityLabel isEqualToString:@"商城"]) {
-            self.accessibilityLabel = bottomShopTitle;
+            // 查找并修改 titleLabel
+            for (UIView *subview in self.subviews) {
+                if ([subview isKindOfClass:[UILabel class]]) {
+                    UILabel *label = (UILabel *)subview;
+                    if (label.text && [label.text isEqualToString:@"商城"]) {
+                        label.text = bottomShopTitle;
+                    }
+                }
+            }
         }
     }
 }
