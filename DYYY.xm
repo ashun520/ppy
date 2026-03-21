@@ -3055,6 +3055,16 @@ static NSArray *DYYYIMMenuItemsByAddingDownloadAction(NSArray *menuItems, id cel
     }
 
     %orig(text);
+    
+    // 应用全局文字颜色
+    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
+    if (globalTextColor && globalTextColor.length > 0 && text && text.length > 0) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if ([self isKindOfClass:[UILabel class]]) {
+                [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
+            }
+        });
+    }
 }
 
 %end
@@ -8113,25 +8123,7 @@ static void findTargetViewInView(UIView *view) {
     %orig;
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        applyGlobalTextColorToView(self);
+        applyGlobalTextColorToView((UIView *)self);
     });
-}
-%end
-
-// 通用 UILabel 设置文字时自动应用颜色
-%hook UILabel
-- (void)setText:(NSString *)text {
-    %orig(text);
-    
-    // 检查是否设置了全局文字颜色
-    NSString *globalTextColor = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYGlobalTextColor"];
-    if (globalTextColor && globalTextColor.length > 0 && text && text.length > 0) {
-        // 延迟应用，确保布局完成
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if ([self isKindOfClass:[UILabel class]]) {
-                [DYYYUtils applyColorSettingsToLabel:self colorHexString:globalTextColor];
-            }
-        });
-    }
 }
 %end
