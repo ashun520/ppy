@@ -8090,7 +8090,7 @@ static void findTargetViewInView(UIView *view) {
     %orig;
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        applyGlobalTextColorToView(self);
+        applyGlobalTextColorToView((UIView *)self);
     });
 }
 %end
@@ -8101,7 +8101,7 @@ static void findTargetViewInView(UIView *view) {
     %orig;
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        applyGlobalTextColorToView(self);
+        applyGlobalTextColorToView((UIView *)self);
     });
 }
 %end
@@ -8112,7 +8112,7 @@ static void findTargetViewInView(UIView *view) {
     %orig;
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        applyGlobalTextColorToView(self);
+        applyGlobalTextColorToView((UIView *)self);
     });
 }
 %end
