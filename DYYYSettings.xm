@@ -276,13 +276,13 @@ void showDYYYSettingsVC(UIViewController *rootVC, BOOL hasAgreed) {
             @"subTitle" : @"选择文字颜色和渐变效果，多个颜色用逗号分隔",
             @"detail" : @"",
             @"cellType" : @26,
-            @"imageName" : @"ic_font_outlined_20"},
+            @"imageName" : @"ic_font_outlined_20"},  // 添加图标
           @{@"identifier" : @"DYYYEnableGradientText",
             @"title" : @"启用渐变文字",
             @"subTitle" : @"启用后文字将显示渐变效果",
             @"detail" : @"",
             @"cellType" : @6,
-            @"imageName" : @"ic_gradient_outlined_20"},
+            @"imageName" : @"ic_gradient_outlined_20"},  // 添加图标
           @{@"identifier" : @"DYYYEnableDanmuColor",
             @"title" : @"启用弹幕改色",
             @"detail" : @"",

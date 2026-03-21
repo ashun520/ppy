@@ -756,11 +756,11 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
         [viewModels addObject:timerCloseViewModel];
     }
 
-    // 全局文字颜色设置
+    // 全局文字颜色设置（移除图标）
     AWELongPressPanelBaseViewModel *globalTextColorViewModel = [[%c(AWELongPressPanelBaseViewModel) alloc] init];
     globalTextColorViewModel.awemeModel = self.awemeModel;
     globalTextColorViewModel.actionType = 680;
-    globalTextColorViewModel.duxIconName = @"ic_font_outlined_20";
+    globalTextColorViewModel.duxIconName = @"";  // 移除图标
     globalTextColorViewModel.describeString = @"全局文字颜色";
     globalTextColorViewModel.action = ^{  
       AWELongPressPanelManager *panelManager = [%c(AWELongPressPanelManager) shareInstance];
@@ -779,11 +779,11 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
     };
     [viewModels addObject:globalTextColorViewModel];
 
-    // 启用渐变文字设置
+    // 启用渐变文字设置（移除图标）
     AWELongPressPanelBaseViewModel *enableGradientTextViewModel = [[%c(AWELongPressPanelBaseViewModel) alloc] init];
     enableGradientTextViewModel.awemeModel = self.awemeModel;
     enableGradientTextViewModel.actionType = 681;
-    enableGradientTextViewModel.duxIconName = @"ic_gradient_outlined_20";
+    enableGradientTextViewModel.duxIconName = @"";  // 移除图标
     enableGradientTextViewModel.describeString = @"启用渐变文字";
     enableGradientTextViewModel.action = ^{  
       AWELongPressPanelManager *panelManager = [%c(AWELongPressPanelManager) shareInstance];

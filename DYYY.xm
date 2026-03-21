@@ -77,12 +77,12 @@ static void applyGlobalTextColorToView(UIView *view) {
     }
 }
 
-// 修复applyColorToAllSubviews函数，确保当gradientScheme为空字符串时，使用globalTextColor
+// 修复 applyColorToAllSubviews 函数，确保当 gradientScheme 为空字符串时，使用 globalTextColor
 static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSString *gradientScheme) {
     if (!view) return;
     
     @try {
-        // 应用到UILabel
+        // 应用到 UILabel
         if ([view isKindOfClass:[UILabel class]]) {
             UILabel *label = (UILabel *)view;
             if (label.text && label.text.length > 0) {
@@ -94,7 +94,7 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
             }
         }
         
-        // 应用到UITextField
+        // 应用到 UITextField
         if ([view isKindOfClass:[UITextField class]]) {
             UITextField *textField = (UITextField *)view;
             if (globalTextColor && globalTextColor.length > 0) {
@@ -102,11 +102,24 @@ static void applyColorToAllSubviews(UIView *view, NSString *globalTextColor, NSS
             }
         }
         
-        // 应用到UITextView
+        // 应用到 UITextView
         if ([view isKindOfClass:[UITextView class]]) {
             UITextView *textView = (UITextView *)view;
             if (globalTextColor && globalTextColor.length > 0) {
                 [DYYYUtils applyColorSettingsToTextView:textView colorHexString:globalTextColor];
+            }
+        }
+        
+        // 应用到 UIButton
+        if ([view isKindOfClass:[UIButton class]]) {
+            UIButton *button = (UIButton *)view;
+            UILabel *buttonLabel = [button valueForKey:@"titleLabel"];
+            if (buttonLabel && buttonLabel.text && buttonLabel.text.length > 0) {
+                if (gradientScheme && gradientScheme.length > 0) {
+                    [DYYYUtils applyColorSettingsToLabel:buttonLabel colorHexString:gradientScheme];
+                } else if (globalTextColor && globalTextColor.length > 0) {
+                    [DYYYUtils applyColorSettingsToLabel:buttonLabel colorHexString:globalTextColor];
+                }
             }
         }
         
@@ -5807,6 +5820,14 @@ static void *DYYYTabBarHeightContext = &DYYYTabBarHeightContext;
 
 - (void)layoutSubviews {
     %orig;
+    
+    // 修改底栏商城名称
+    NSString *bottomShopTitle = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYBottomShopTitle"];
+    if (bottomShopTitle && bottomShopTitle.length > 0) {
+        if ([self.accessibilityLabel isEqualToString:@"商城"]) {
+            self.accessibilityLabel = bottomShopTitle;
+        }
+    }
 }
 
 %end
